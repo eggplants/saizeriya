@@ -284,36 +284,20 @@ pipx<span class="w"> </span>install<span class="w"> </span>saizeriya
 <h3 id="cli">CLI</h3>
 
 <pre><code>$ saizeriya
+usage: saizeriya [-h] &lt;command&gt; ...
 
-###### Usage:
-&gt; saizeriya start &lt;name&gt; &lt;qrurl&gt; [--people &lt;count&gt;]
-&gt; saizeriya use &lt;name&gt;
-&gt; saizeriya list
-&gt; saizeriya rm &lt;name&gt;
-&gt; saizeriya fetch-menu [--out &lt;path&gt;] [--shop &lt;id&gt;]... [--max-code &lt;n&gt;]
-&gt;                      [--table-no &lt;n&gt;] [--people &lt;n&gt;] [--lng &lt;n&gt;]
-&gt;                      [--no-shuffle]
+Saizeriya order CLI.
 
+positional arguments:
+  &lt;command&gt;
+    start       Start a new ordering session
+    use         Resume a saved session
+    list        List saved sessions
+    rm          Remove a saved session
+    fetch-menu  Crawl menu data for shops
 
-After start/use, available commands:
-  state
-  people &lt;count&gt;
-  lookup &lt;code&gt;
-  add &lt;code&gt; [count] [--mod-id &lt;id&gt;] [--mod-count &lt;count&gt;] [--reorder]
-  cart
-  cart-page
-  remove &lt;index&gt;
-  submit
-  account
-  receipt
-  call [staff|dessert]
-  menu
-  history
-  reorder &lt;code&gt;
-  alcohol
-  check &lt;order|last|midnight&gt;
-  help
-  exit
+options:
+  -h, --help    show this help message and exit
 </code></pre>
 
 <h3 id="library">Library</h3>
@@ -1975,7 +1959,7 @@ After start/use, available commands:
                 <section id="__version__">
                     <div class="attr variable">
             <span class="name">__version__</span>        =
-<span class="default_value">&#39;0.0.0.post1+ea7fd84&#39;</span>
+<span class="default_value">&#39;0.0.0.post1+75d2859&#39;</span>
 
         
     </div>

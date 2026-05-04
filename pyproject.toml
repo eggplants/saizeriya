@@ -68,9 +68,12 @@ lint.ignore = [
   "D203",
   "D213",
 ]
+lint.per-file-ignores."saizeriya/shops.py" = [
+  "RUF001",
+]
 lint.per-file-ignores."tests/test_*.py" = [
   "D",
-  "S101", # Use of assert detected
+  "S101",
 ]
 lint.pydocstyle.convention = "google"
 

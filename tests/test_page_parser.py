@@ -86,7 +86,7 @@ def test_top_page_people_count_from_label() -> None:
 def test_unknown_when_form_missing() -> None:
     parser = PageParser("<html><body><div /></body></html>")
     assert parser.get_page_kind() == "unknown"
-    with pytest.raises(ValueError, match="frm_ctrl"):
+    with pytest.raises(TypeError, match="frm_ctrl"):
         parser.get_next_action_id()
 
 

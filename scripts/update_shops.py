@@ -8,12 +8,14 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 import re
-import sys
 from pathlib import Path
 
 import httpx
 from bs4 import BeautifulSoup, Tag
+
+logger = logging.getLogger(__name__)
 
 SEARCH_URL = "https://shop.saizeriya.co.jp/sz_restaurant/freeword"
 SEARCH_PARAMS = {
@@ -60,7 +62,7 @@ def fetch_all(http: httpx.Client, *, limit: int = 500) -> list[tuple[str, str]]:
         response.raise_for_status()
         page_pairs = parse_page(response.text)
         collected.extend(page_pairs)
-        print(f"page {page}: {len(page_pairs)} entries", file=sys.stderr)
+        logger.info("page %d: %d entries", page, len(page_pairs))
         if len(page_pairs) < limit:
             break
         page += 1
@@ -72,9 +74,11 @@ def deduplicate(pairs: list[tuple[str, str]]) -> dict[str, str]:
     seen: dict[str, str] = {}
     for name, code in pairs:
         if name in seen and seen[name] != code:
-            print(
-                f"warning: duplicate name {name!r} -> {seen[name]!r}, {code!r}; keeping first",
-                file=sys.stderr,
+            logger.warning(
+                "duplicate name %r -> %r, %r; keeping first",
+                name,
+                seen[name],
+                code,
             )
             continue
         seen.setdefault(name, code)
@@ -120,12 +124,17 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+    )
+
     headers = {"user-agent": USER_AGENT, "accept-language": "ja"}
     with httpx.Client(headers=headers, timeout=30.0, follow_redirects=True) as http:
         pairs = fetch_all(http, limit=args.limit)
 
     if not pairs:
-        print("error: no shops found", file=sys.stderr)
+        logger.error("no shops found")
         return 1
 
     shops = deduplicate(pairs)
@@ -134,16 +143,16 @@ def main(argv: list[str] | None = None) -> int:
     out_path: Path = args.out
     previous = out_path.read_text(encoding="utf-8") if out_path.exists() else None
     if previous == rendered:
-        print(f"{out_path}: unchanged ({len(shops)} shops)", file=sys.stderr)
+        logger.info("%s: unchanged (%d shops)", out_path, len(shops))
         return 0
 
     if args.check:
-        print(f"{out_path}: would change", file=sys.stderr)
+        logger.error("%s: would change", out_path)
         return 1
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(rendered, encoding="utf-8")
-    print(f"{out_path}: wrote {len(shops)} shops", file=sys.stderr)
+    logger.info("%s: wrote %d shops", out_path, len(shops))
     return 0
 
 

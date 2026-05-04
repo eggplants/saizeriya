@@ -23,7 +23,8 @@
   "ignorePaths": [
     ".gitignore",
     ".cspell.json",
-    ".devcontainer/devcontainer.json"
+    ".devcontainer/devcontainer.json",
+    "saizeriya/shops.py"
   ],
   "features": {
     "weighted-suggestions": true

@@ -7,17 +7,20 @@ appending discovered items to a JSON file that can be resumed across runs.
 
 from __future__ import annotations
 
-from .shops import SHOPS
-
 import json
+import logging
 import random
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import httpx
 
+from .shops import SHOPS
+
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterable
+    from collections.abc import Iterable
+
+logger = logging.getLogger(__name__)
 
 FETCH_URL = "https://ioes.saizeriya.co.jp/saizeriya2/src/cmd/get_item.php"
 DEFAULT_OUTPUT = Path("data/menu-by-shop.json")
@@ -30,7 +33,7 @@ REQUEST_HEADERS = {
     "accept": "application/json, text/javascript, */*; q=0.01",
     "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
     "origin": "https://ioes.saizeriya.co.jp",
-    "referer": "https://ioes.saizeriya.co.jp/saizeriya2/",
+    "referer": "https://ioes.saizeriya.co.jp/saizeriya2/",  # cspell:words referer
     "x-requested-with": "XMLHttpRequest",
 }
 
@@ -38,7 +41,7 @@ REQUEST_HEADERS = {
 ResultMap = dict[str, dict[str, dict[str, Any]]]
 
 
-def fetch_item(
+def fetch_item(  # noqa: PLR0913
     shop_id: str,
     item_code: int,
     *,
@@ -97,9 +100,8 @@ def crawl(  # noqa: PLR0913
     people_count: str = DEFAULT_PEOPLE_COUNT,
     shuffle: bool = True,
     http: httpx.Client | None = None,
-    log: Callable[[str], None] = print,
 ) -> ResultMap:
-    """Crawl `shops` × `item_code_count`, persisting incrementally to `out`.
+    """Crawl `shops` * `item_code_count`, persisting incrementally to `out`.
 
     Resumes from any existing data in `out` by skipping known item codes.
     """
@@ -136,17 +138,22 @@ def crawl(  # noqa: PLR0913
                         people_count=people_count,
                     )
                 except httpx.HTTPError as exc:
-                    log(f"Failed to fetch {shop_id}/{item_id}: {exc}")
+                    logger.warning("Failed to fetch %s/%s: %s", shop_id, item_id, exc)
                     continue
-                log(f"Fetched {shop_id}/{item_id}")
+                logger.info("Fetched %s/%s", shop_id, item_id)
                 if not result.get("item_data"):
                     continue
                 shop_items[item_id] = result
                 known.add(item_id)
-                log(f"Found item {item_id} for shop {shop_id}")
+                logger.info("Found item %s for shop %s", item_id, shop_id)
             write_results(out, results)
-            log(
-                f"Finished shop {shop_id}: skipped {skipped}, attempts {attempts}/{total}, found {len(known)}",
+            logger.info(
+                "Finished shop %s: skipped %d, attempts %d/%d, found %d",
+                shop_id,
+                skipped,
+                attempts,
+                total,
+                len(known),
             )
     finally:
         if own_http:

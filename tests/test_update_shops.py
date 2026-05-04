@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import logging
 import sys
 from pathlib import Path
+
+import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
@@ -46,13 +49,13 @@ def test_deduplicate_keeps_first_occurrence_for_same_code() -> None:
     assert deduplicate(pairs) == {"A": "0001", "B": "0002"}
 
 
-def test_deduplicate_warns_and_drops_conflicting_codes(capsys) -> None:  # type: ignore[no-untyped-def]
+def test_deduplicate_warns_and_drops_conflicting_codes(caplog: pytest.LogCaptureFixture) -> None:
     pairs = [("X", "0001"), ("X", "0002")]
-    result = deduplicate(pairs)
+    with caplog.at_level(logging.WARNING, logger="scripts.update_shops"):
+        result = deduplicate(pairs)
     assert result == {"X": "0001"}
-    err = capsys.readouterr().err
-    assert "duplicate" in err
-    assert "X" in err
+    assert "duplicate" in caplog.text
+    assert "X" in caplog.text
 
 
 def test_render_module_is_sorted_by_code_and_double_quoted() -> None:

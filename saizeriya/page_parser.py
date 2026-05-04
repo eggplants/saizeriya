@@ -25,6 +25,7 @@ class PageParser:
     """Parse a Saizeriya ordering page and extract state."""
 
     def __init__(self, html: str) -> None:
+        """Initialize the parser with the page's HTML content."""
         self.root = BeautifulSoup(html, "lxml")
 
     def get_optional_input_value(self, selector: str) -> str | None:
@@ -91,13 +92,13 @@ class PageParser:
         form = self.root.select_one('form[id="frm_ctrl"]')
         if not isinstance(form, Tag):
             msg = 'Form with id "frm_ctrl" not found'
-            raise ValueError(msg)
+            raise TypeError(msg)
         action = _attr_str(form, "action")
         if not action:
             msg = "Form action attribute not found"
             raise ValueError(msg)
         parts = action.split("?", 1)
-        if len(parts) < 2 or not parts[1]:
+        if len(parts) < 2 or not parts[1]:  # noqa: PLR2004
             msg = "No action id found in form action"
             raise ValueError(msg)
         return parts[1]
@@ -111,7 +112,7 @@ class PageParser:
         lines: list[AccountLine] = []
         for row in self.root.select("#body-section .list-base table tbody tr"):
             cells = row.select("td")
-            if len(cells) < 3:
+            if len(cells) < 3:  # noqa: PLR2004
                 continue
             name = cells[0].get_text(strip=True)
             count_text = cells[1].get_text(strip=True) or "0"

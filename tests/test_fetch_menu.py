@@ -76,7 +76,6 @@ def test_crawl_writes_only_found_items_and_resumes(tmp_path: Path) -> None:
             item_code_count=3,
             shuffle=False,
             http=http,
-            log=lambda _msg: None,
         )
 
     assert "42" in results
@@ -100,7 +99,6 @@ def test_crawl_writes_only_found_items_and_resumes(tmp_path: Path) -> None:
             item_code_count=3,
             shuffle=False,
             http=http,
-            log=lambda _msg: None,
         )
     assert "0001" not in calls
     assert sorted(calls) == ["0000", "0002"]

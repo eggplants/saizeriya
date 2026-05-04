@@ -5,9 +5,11 @@ from __future__ import annotations
 import argparse
 import contextlib
 import json
+import logging
 import os
 import shlex
 import sys
+import textwrap
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -19,35 +21,7 @@ from . import fetch_menu
 from .client import SaizeriyaClient
 from .types import AccountSummary, CartItem, ClientState
 
-USAGE = """\
-Usage:
-  saizeriya start <name> <qrurl> [--people <count>]
-  saizeriya use <name>
-  saizeriya list
-  saizeriya rm <name>
-  saizeriya fetch-menu [--out <path>] [--shop <id>]... [--max-code <n>]
-                       [--table-no <n>] [--people <n>] [--lng <n>]
-                       [--no-shuffle]
-
-After start/use, available commands:
-  state
-  people <count>
-  lookup <code>
-  add <code> [count] [--mod-id <id>] [--mod-count <count>] [--reorder]
-  cart
-  cart-page
-  remove <index>
-  submit
-  account
-  receipt
-  call [staff|dessert]
-  menu
-  history
-  reorder <code>
-  alcohol
-  check <order|last|midnight>
-  help
-  exit"""
+logger = logging.getLogger(__name__)
 
 
 class _ReplParseError(Exception):
@@ -170,43 +144,53 @@ def _make_http(cookies: list[Any] | None = None) -> httpx.Client:
 
 
 def _print_state(state: ClientState) -> None:
-    print(  # noqa: T201
-        f"shop={state.shop_id} table={state.table_no} "
-        f"people={state.people_count} page={state.page_kind} cart={len(state.cart)}",
+    logger.info(
+        "shop=%s table=%s people=%s page=%s cart=%d",
+        state.shop_id,
+        state.table_no,
+        state.people_count,
+        state.page_kind,
+        len(state.cart),
     )
 
 
 def _print_lookup(result: dict[str, Any]) -> None:
     if result.get("result") != "OK" or not result.get("item_data"):
-        print(result)  # noqa: T201
+        logger.info("%s", result)
         return
     item = result["item_data"]
     availability = "sold out" if item.get("state") == 0 else "available"
-    print(f"{item.get('id', '')} {item.get('name', '')} {item.get('price', '')}yen {availability}")  # noqa: T201
+    logger.info(
+        "%s %s %s yen %s",
+        item.get("id", ""),
+        item.get("name", ""),
+        item.get("price", ""),
+        availability,
+    )
     if item.get("mod_id"):
-        print(f"modifier: {item['mod_id']} {item.get('mod_name', '')}")  # noqa: T201
+        logger.info("modifier: %s %s", item["mod_id"], item.get("mod_name", ""))
     for msg in item.get("messages", []) or []:
-        print(msg)  # noqa: T201
+        logger.info("%s", msg)
 
 
 def _print_cart(state: ClientState) -> None:
     if not state.cart:
-        print("Cart is empty.")  # noqa: T201
+        logger.info("Cart is empty.")
         return
     for index, item in enumerate(state.cart):
-        price = "" if item.price is None else f" {item.price}yen"
+        price = "" if item.price is None else f" {item.price} yen"
         name = item.name or ""
-        print(f"{index + 1}. {item.id} x{item.count} {name}{price}")  # noqa: T201
+        logger.info("%d. %s x%d %s%s", index + 1, item.id, item.count, name, price)
 
 
 def _print_account(account: AccountSummary) -> None:
     if not account.lines:
-        print("No account lines.")  # noqa: T201
+        logger.info("No account lines.")
     for line in account.lines:
-        print(f"{line.name} x{line.count} {line.price}yen")  # noqa: T201
-    print(f"total: {account.total}yen ({account.count} items)")  # noqa: T201
+        logger.info("%s x %d: %d yen", line.name, line.count, line.price)
+    logger.info("total: %d yen (%d items)", account.total, account.count)
     if account.control_no:
-        print(f"control: {account.control_no}")  # noqa: T201
+        logger.info("control: %s", account.control_no)
 
 
 def _build_repl_parser() -> _ReplArgumentParser:
@@ -274,7 +258,40 @@ def _run_command(client: SaizeriyaClient, args: list[str]) -> str:  # noqa: C901
     command: str = ns.command
 
     if command == "help":
-        print(USAGE)  # noqa: T201
+        print(  # noqa: T201
+            textwrap.dedent(
+                """
+                Usage:
+                  saizeriya start <name> <qr_url> [--people <count>]
+                  saizeriya use <name>
+                  saizeriya list
+                  saizeriya rm <name>
+                  saizeriya fetch-menu [--out <path>] [--shop <id>]... [--max-code <n>]
+                                       [--table-no <n>] [--people <n>] [--lng <n>]
+                                       [--no-shuffle]
+
+                After start/use, available commands:
+                  state
+                  people <count>
+                  lookup <code>
+                  add <code> [count] [--mod-id <id>] [--mod-count <count>] [--reorder]
+                  cart
+                  cart-page
+                  remove <index>
+                  submit
+                  account
+                  receipt
+                  call [staff|dessert]
+                  menu
+                  history
+                  reorder <code>
+                  alcohol
+                  check <order|last|midnight>
+                  help
+                  exit
+                """.strip()
+            )
+        )
         return "continue"
     if command in ("exit", "quit"):
         return "exit"
@@ -310,7 +327,7 @@ def _run_command(client: SaizeriyaClient, args: list[str]) -> str:  # noqa: C901
         _print_account(account)
     elif command == "call":
         result = client.call_dessert() if ns.target == "dessert" else client.call_staff()
-        print(result)  # noqa: T201
+        logger.info("%s", result)
     elif command == "menu":
         _print_state(client.go_to_menu())
     elif command == "history":
@@ -318,45 +335,45 @@ def _run_command(client: SaizeriyaClient, args: list[str]) -> str:  # noqa: C901
     elif command == "reorder":
         _print_state(client.reorder(ns.code))
     elif command == "alcohol":
-        print(client.confirm_alcohol())  # noqa: T201
+        logger.info("%s", client.confirm_alcohol())
     elif command == "check":
         if ns.target == "order":
-            print(client.check_order_started())  # noqa: T201
+            logger.info("%s", client.check_order_started())
         elif ns.target == "last":
-            print(client.check_last_order())  # noqa: T201
+            logger.info("%s", client.check_last_order())
         else:
-            print(client.check_midnight())  # noqa: T201
+            logger.info("%s", client.check_midnight())
     return "continue"
 
 
 def _run_repl(name: str, client: SaizeriyaClient, http: httpx.Client, created_at: int) -> None:
-    print(f'Session "{name}" is ready. Type help for commands.')  # noqa: T201
+    logger.info('Session "%s" is ready. Type help for commands.', name)
     prompt = f"saizeriya:{name}> "
     while True:
         try:
             line = input(prompt)
         except (EOFError, KeyboardInterrupt):
-            print()  # noqa: T201
+            sys.stdout.write("\n")
             break
         try:
             args = shlex.split(line)
-        except ValueError as exc:
-            print(f"parse error: {exc}", file=sys.stderr)  # noqa: T201
+        except ValueError:
+            logger.exception("parse error")
             continue
         try:
             result = _run_command(client, args)
             _save_session(name, http, client, created_at)
             if result == "exit":
                 break
-        except Exception as exc:  # noqa: BLE001
-            print(str(exc), file=sys.stderr)  # noqa: T201
+        except Exception:
+            logger.exception("Error while executing command: %s", line)
 
 
 def _cmd_start(ns: argparse.Namespace) -> None:
     http = _make_http()
     try:
         client = SaizeriyaClient(
-            qr_url_source=ns.qrurl,
+            qr_url_source=ns.qr_url,
             people_count=ns.people_count,
             http=http,
         )
@@ -404,8 +421,11 @@ def _cmd_list() -> None:
             snapshot["updatedAt"] / 1000,
             tz=timezone.utc,
         ).isoformat()
-        print(  # noqa: T201
-            f"{snapshot['name']}\t{updated}\ttable={snapshot['state']['tableNo']}",
+        logger.info(
+            "%s\t%s\ttable=%s",
+            snapshot["name"],
+            updated,
+            snapshot["state"]["tableNo"],
         )
 
 
@@ -413,7 +433,7 @@ def _cmd_rm(ns: argparse.Namespace) -> None:
     sessions = _read_sessions()
     sessions.pop(ns.name, None)
     _write_sessions(sessions)
-    print(f"Removed {ns.name}")  # noqa: T201
+    logger.info("Removed %s", ns.name)
 
 
 def _cmd_fetch_menu(ns: argparse.Namespace) -> None:
@@ -435,7 +455,7 @@ def _build_top_parser() -> argparse.ArgumentParser:
 
     p_start = sub.add_parser("start", help="Start a new ordering session")
     p_start.add_argument("name")
-    p_start.add_argument("qrurl")
+    p_start.add_argument("qr_url")
     p_start.add_argument("--people", dest="people_count", type=int, default=None)
 
     p_use = sub.add_parser("use", help="Resume a saved session")
@@ -463,6 +483,12 @@ def main(argv: list[str] | None = None) -> None:
     if argv is None:
         argv = sys.argv[1:]
 
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(message)s",
+        stream=sys.stdout,
+    )
+
     if not argv or argv[0] == "help":
         parser = _build_top_parser()
         parser.print_help()
@@ -486,8 +512,8 @@ def main(argv: list[str] | None = None) -> None:
             _cmd_rm(ns)
         elif ns.command == "fetch-menu":
             _cmd_fetch_menu(ns)
-    except Exception as exc:  # noqa: BLE001
-        print(str(exc), file=sys.stderr)  # noqa: T201
+    except Exception:
+        logger.exception("Error while executing command: %s", ns.command)
         sys.exit(1)
 
 

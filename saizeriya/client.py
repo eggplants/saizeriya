@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import copy
 import re
-from types import TracebackType
 from typing import TYPE_CHECKING, Any
 from urllib.parse import urljoin
 
@@ -27,6 +26,8 @@ from .types import (
 )
 
 if TYPE_CHECKING:
+    from types import TracebackType
+
     from typing_extensions import Self
 
 _CODE_PATTERN = re.compile(r"^\d{4}$")
@@ -43,6 +44,7 @@ class SaizeriyaClient:
         initial_state: ClientState | None = None,
         http: httpx.Client | None = None,
     ) -> None:
+        """Initialize the client with either a QR URL or a previous state snapshot."""
         self._http = http if http is not None else httpx.Client(follow_redirects=True)
         self._owns_http = http is None
 
@@ -83,14 +85,14 @@ class SaizeriyaClient:
         if self._owns_http:
             self._http.close()
 
-    def __enter__(self) -> Self:
+    def __enter__(self) -> Self:  # noqa: D105
         return self
 
-    def __exit__(
+    def __exit__(  # noqa: D105
         self,
-        exc_type: type[BaseException] | None,
-        exc: BaseException | None,
-        tb: TracebackType | None,
+        _exc_type: type[BaseException] | None,
+        _exc: BaseException | None,
+        _tb: TracebackType | None,
     ) -> None:
         self.close()
 
@@ -239,7 +241,7 @@ class SaizeriyaClient:
             {
                 **create_base_fields("main", self._require_token()),
                 "ctrl": "add",
-                "ord-drkbar-cnt": "0",
+                "ord-drkbar-cnt": "0",  # cspell:words drkbar
                 "is_reorder": "1" if reorder else "0",
                 "order-time": now_order_time(),
                 "code": code,
@@ -279,9 +281,9 @@ class SaizeriyaClient:
                 **create_base_fields("history", self._state.token),
                 "ctrl": "remember",
                 "code": "",
-                "drinkbar-cnt": "0",
+                "drinkbar-cnt": "0",  # cspell:words drinkbar
                 "alcohol-cnt": "0",
-                "ord-drkbar-cnt": "0",
+                "ord-drkbar-cnt": "0",  # cspell:words drkbar
             }
         )
         return self.get_state()
@@ -375,7 +377,7 @@ class SaizeriyaClient:
     def check_last_order(self) -> dict[str, Any]:
         """Check the last-order time window."""
         return self._post_json(
-            "./src/cmd/check_lastorder.php",
+            "./src/cmd/check_lastorder.php",  # cspell:words lastorder
             {"sid": self._state.shop_id},
         )
 

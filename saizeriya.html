@@ -298,36 +298,52 @@ positional arguments:
 
 options:
   -h, --help    show this help message and exit
+
+available commands in start/use REPL:
+   state
+    Show current session state
+   people &lt;count&gt;
+    Set number of people at the table
+   lookup &lt;code&gt;
+    Look up an item by code
+   add [--mod-id MOD_ID] [--mod-count MOD_COUNT] [--reorder] &lt;code&gt; [&lt;count&gt;]
+    Add an item to the cart
+   cart
+    Show cart contents
+   cart-page
+    Navigate to the cart page
+   remove &lt;index&gt;
+    Remove an item from the cart by index
+   submit
+    Submit the current order
+   account
+    Show account summary
+   receipt
+    Show receipt
+   call [{staff,dessert}]
+    Call staff or dessert service
+   menu
+    Navigate to the menu page
+   history
+    Navigate to order history
+   reorder &lt;code&gt;
+    Reorder a previously ordered item
+   alcohol
+    Confirm alcohol order
+   check {order,last,midnight}
+    Check order/last-order/midnight status
+   help
+    Show this help message
+   exit
+    Exit the REPL
+   quit
+    Exit the REPL
 </code></pre>
 
 <p>To start session named <code>lunch</code> and ener REPL:</p>
 
 <div class="pdoc-code codehilite">
 <pre><span></span><code>saizeriya<span class="w"> </span>start<span class="w"> </span>lunch<span class="w"> </span><span class="s2">&quot;https://ioes03.saizeriya.co.jp/saizeriya3/?...&quot;</span>
-</code></pre>
-</div>
-
-<p>After start/use, available commands in REPL:</p>
-
-<div class="pdoc-code codehilite">
-<pre><span></span><code>state
-people &lt;count&gt;
-lookup &lt;code&gt;
-add &lt;code&gt; [count] [--mod-id &lt;id&gt;] [--mod-count &lt;count&gt;] [--reorder]
-cart
-cart-page
-remove &lt;index&gt;
-submit
-account
-receipt
-call [staff|dessert]
-menu
-history
-reorder &lt;code&gt;
-alcohol
-check &lt;order|last|midnight&gt;
-help
-exit
 </code></pre>
 </div>
 
@@ -2005,7 +2021,7 @@ exit
                 <section id="__version__">
                     <div class="attr variable">
             <span class="name">__version__</span>        =
-<span class="default_value">&#39;0.0.0.post1+ed748b1&#39;</span>
+<span class="default_value">&#39;0.0.0.post1+fc0845e&#39;</span>
 
         
     </div>

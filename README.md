@@ -38,34 +38,20 @@ pipx install saizeriya
 
 ```shellsession
 $ saizeriya
-Usage:
-  saizeriya start <name> <qrurl> [--people <count>]
-  saizeriya use <name>
-  saizeriya list
-  saizeriya rm <name>
-  saizeriya fetch-menu [--out <path>] [--shop <id>]... [--max-code <n>]
-                       [--table-no <n>] [--people <n>] [--lng <n>]
-                       [--no-shuffle]
+usage: saizeriya [-h] <command> ...
 
-After start/use, available commands:
-  state
-  people <count>
-  lookup <code>
-  add <code> [count] [--mod-id <id>] [--mod-count <count>] [--reorder]
-  cart
-  cart-page
-  remove <index>
-  submit
-  account
-  receipt
-  call [staff|dessert]
-  menu
-  history
-  reorder <code>
-  alcohol
-  check <order|last|midnight>
-  help
-  exit
+Saizeriya order CLI.
+
+positional arguments:
+  <command>
+    start       Start a new ordering session
+    use         Resume a saved session
+    list        List saved sessions
+    rm          Remove a saved session
+    fetch-menu  Crawl menu data for shops
+
+options:
+  -h, --help    show this help message and exit
 ```
 
 ### Library

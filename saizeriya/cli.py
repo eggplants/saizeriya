@@ -7,11 +7,13 @@ import logging
 import os
 import shlex
 import sys
-import textwrap
 import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, NoReturn
+
+from _colorize import can_colorize, get_theme  # ty: ignore[unresolved-import]
+
 
 import httpx
 
@@ -191,57 +193,78 @@ def _print_account(account: AccountSummary) -> None:
         logger.info("control: %s", account.control_no)
 
 
-def _build_repl_parser() -> _ReplArgumentParser:
+def _build_repl_parser() -> tuple[_ReplArgumentParser, argparse.Action]:
     parser = _ReplArgumentParser(prog="", add_help=False)
     sub = parser.add_subparsers(dest="command", required=True)
 
-    sub.add_parser("state", add_help=False)
+    sub.add_parser("state", add_help=False, description="Show current session state")
 
-    p_people = sub.add_parser("people", add_help=False)
-    p_people.add_argument("count", type=int)
+    p_people = sub.add_parser("people", add_help=False, description="Set number of people at the table")
+    p_people.add_argument("count", type=int, metavar="<count>")
 
-    p_lookup = sub.add_parser("lookup", add_help=False)
-    p_lookup.add_argument("code")
+    p_lookup = sub.add_parser("lookup", add_help=False, description="Look up an item by code")
+    p_lookup.add_argument("code", metavar="<code>")
 
-    p_add = sub.add_parser("add", add_help=False)
-    p_add.add_argument("code")
-    p_add.add_argument("count", nargs="?", type=int, default=1)
+    p_add = sub.add_parser("add", add_help=False, description="Add an item to the cart")
+    p_add.add_argument("code", metavar="<code>")
+    p_add.add_argument("count", nargs="?", type=int, default=1, metavar="<count>")
     p_add.add_argument("--mod-id", dest="mod_id", default="")
     p_add.add_argument("--mod-count", dest="mod_count", type=int, default=0)
     p_add.add_argument("--reorder", action="store_true")
 
-    sub.add_parser("cart", add_help=False)
-    sub.add_parser("cart-page", add_help=False)
+    sub.add_parser("cart", add_help=False, description="Show cart contents")
+    sub.add_parser("cart-page", add_help=False, description="Navigate to the cart page")
 
-    p_remove = sub.add_parser("remove", add_help=False)
-    p_remove.add_argument("index", type=int)
+    p_remove = sub.add_parser("remove", add_help=False, description="Remove an item from the cart by index")
+    p_remove.add_argument("index", type=int, metavar="<index>")
 
-    sub.add_parser("submit", add_help=False)
-    sub.add_parser("account", add_help=False)
-    sub.add_parser("receipt", add_help=False)
+    sub.add_parser("submit", add_help=False, description="Submit the current order")
+    sub.add_parser("account", add_help=False, description="Show account summary")
+    sub.add_parser("receipt", add_help=False, description="Show receipt")
 
-    p_call = sub.add_parser("call", add_help=False)
+    p_call = sub.add_parser("call", add_help=False, description="Call staff or dessert service")
     p_call.add_argument("target", nargs="?", choices=("staff", "dessert"), default="staff")
 
-    sub.add_parser("menu", add_help=False)
-    sub.add_parser("history", add_help=False)
+    sub.add_parser("menu", add_help=False, description="Navigate to the menu page")
+    sub.add_parser("history", add_help=False, description="Navigate to order history")
 
-    p_reorder = sub.add_parser("reorder", add_help=False)
-    p_reorder.add_argument("code")
+    p_reorder = sub.add_parser("reorder", add_help=False, description="Reorder a previously ordered item")
+    p_reorder.add_argument("code", metavar="<code>")
 
-    sub.add_parser("alcohol", add_help=False)
+    sub.add_parser("alcohol", add_help=False, description="Confirm alcohol order")
 
-    p_check = sub.add_parser("check", add_help=False)
+    p_check = sub.add_parser("check", add_help=False, description="Check order/last-order/midnight status")
     p_check.add_argument("target", choices=("order", "last", "midnight"))
 
-    sub.add_parser("help", add_help=False)
-    sub.add_parser("exit", add_help=False)
-    sub.add_parser("quit", add_help=False)
+    sub.add_parser("help", add_help=False, description="Show this help message")
+    sub.add_parser("exit", add_help=False, description="Exit the REPL")
+    sub.add_parser("quit", add_help=False, description="Exit the REPL")
 
-    return parser
+    return parser, sub
 
 
-_REPL_PARSER = _build_repl_parser()
+_REPL_PARSER, _REPL_SUBS = _build_repl_parser()
+
+
+def _repl_help() -> str:
+    rows: list[tuple[str, str]] = []
+    choices = _REPL_SUBS.choices
+    if isinstance(choices, dict):
+        for subparser in choices.values():
+            if isinstance(subparser, argparse.ArgumentParser):
+                usage = " ".join(subparser.format_usage().split()[1:])
+                rows.append((usage, subparser.description or ""))
+
+    heading = "available commands in start/use REPL:"
+    if can_colorize():
+        t = get_theme().argparse
+        heading = f"{t.heading}{heading}{t.reset}"
+    lines = [heading]
+    for usage, desc in rows:
+        lines.append(f"  {usage}")
+        if desc:
+            lines.append(f"    {desc}")
+    return "\n".join(lines)
 
 
 def _run_command(client: SaizeriyaClient, args: list[str]) -> str:  # noqa: C901, PLR0912
@@ -256,31 +279,7 @@ def _run_command(client: SaizeriyaClient, args: list[str]) -> str:  # noqa: C901
     command: str = ns.command
 
     if command == "help":
-        print(  # noqa: T201
-            textwrap.dedent(
-                """
-                Available commands:
-                  state
-                  people <count>
-                  lookup <code>
-                  add <code> [count] [--mod-id <id>] [--mod-count <count>] [--reorder]
-                  cart
-                  cart-page
-                  remove <index>
-                  submit
-                  account
-                  receipt
-                  call [staff|dessert]
-                  menu
-                  history
-                  reorder <code>
-                  alcohol
-                  check <order|last|midnight>
-                  help
-                  exit
-                """.strip()
-            )
-        )
+        print(_repl_help())  # noqa: T201
         return "continue"
     if command in ("exit", "quit"):
         return "exit"
@@ -439,7 +438,12 @@ def _cmd_fetch_menu(ns: argparse.Namespace) -> None:
 
 
 def _build_top_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="saizeriya", description="Saizeriya order CLI.")
+    parser = argparse.ArgumentParser(
+        prog="saizeriya",
+        description="Saizeriya order CLI.",
+        epilog=_repl_help(),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
     sub = parser.add_subparsers(dest="command", metavar="<command>")
 
     p_start = sub.add_parser("start", help="Start a new ordering session")

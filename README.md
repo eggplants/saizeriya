@@ -52,34 +52,52 @@ positional arguments:
 
 options:
   -h, --help    show this help message and exit
+
+available commands in start/use REPL:
+   state
+    Show current session state
+   people <count>
+    Set number of people at the table
+   lookup <code>
+    Look up an item by code
+   add [--mod-id MOD_ID] [--mod-count MOD_COUNT] [--reorder] <code> [<count>]
+    Add an item to the cart
+   cart
+    Show cart contents
+   cart-page
+    Navigate to the cart page
+   remove <index>
+    Remove an item from the cart by index
+   submit
+    Submit the current order
+   account
+    Show account summary
+   receipt
+    Show receipt
+   call [{staff,dessert}]
+    Call staff or dessert service
+   menu
+    Navigate to the menu page
+   history
+    Navigate to order history
+   reorder <code>
+    Reorder a previously ordered item
+   alcohol
+    Confirm alcohol order
+   check {order,last,midnight}
+    Check order/last-order/midnight status
+   help
+    Show this help message
+   exit
+    Exit the REPL
+   quit
+    Exit the REPL
 ```
+
 To start session named `lunch` and ener REPL:
 
 ```bash
 saizeriya start lunch "https://ioes03.saizeriya.co.jp/saizeriya3/?..."
-```
-
-After start/use, available commands in REPL:
-
-```text
-state
-people <count>
-lookup <code>
-add <code> [count] [--mod-id <id>] [--mod-count <count>] [--reorder]
-cart
-cart-page
-remove <index>
-submit
-account
-receipt
-call [staff|dessert]
-menu
-history
-reorder <code>
-alcohol
-check <order|last|midnight>
-help
-exit
 ```
 
 ### Library

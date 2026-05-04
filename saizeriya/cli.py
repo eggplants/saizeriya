@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import contextlib
 import json
 import os
@@ -10,16 +11,13 @@ import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import Any, NoReturn
 
 import httpx
 
 from . import fetch_menu
 from .client import SaizeriyaClient
 from .types import AccountSummary, CartItem, ClientState
-
-if TYPE_CHECKING:
-    from collections.abc import Sequence
 
 USAGE = """\
 Usage:
@@ -50,6 +48,23 @@ After start/use, available commands:
   check <order|last|midnight>
   help
   exit"""
+
+
+class _ReplParseError(Exception):
+    """Raised when REPL argument parsing fails."""
+
+
+class _ReplArgumentParser(argparse.ArgumentParser):
+    """Argument parser that raises instead of terminating the process."""
+
+    def error(self, message: str) -> NoReturn:
+        raise _ReplParseError(message)
+
+    def exit(self, status: int = 0, message: str | None = None) -> NoReturn:
+        if message:
+            raise _ReplParseError(message)
+        detail = f"exit status {status}"
+        raise _ReplParseError(detail)
 
 
 def _cli_home() -> Path:
@@ -194,31 +209,69 @@ def _print_account(account: AccountSummary) -> None:
         print(f"control: {account.control_no}")  # noqa: T201
 
 
-def _parse_int_option(args: Sequence[str], name: str) -> int | None:
-    if name not in args:
-        return None
-    index = list(args).index(name)
-    if index + 1 >= len(args):
-        msg = f"{name} requires an integer value"
-        raise ValueError(msg)
-    try:
-        return int(args[index + 1])
-    except ValueError as exc:
-        msg = f"{name} requires an integer value"
-        raise ValueError(msg) from exc
+def _build_repl_parser() -> _ReplArgumentParser:
+    parser = _ReplArgumentParser(prog="", add_help=False)
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    sub.add_parser("state", add_help=False)
+
+    p_people = sub.add_parser("people", add_help=False)
+    p_people.add_argument("count", type=int)
+
+    p_lookup = sub.add_parser("lookup", add_help=False)
+    p_lookup.add_argument("code")
+
+    p_add = sub.add_parser("add", add_help=False)
+    p_add.add_argument("code")
+    p_add.add_argument("count", nargs="?", type=int, default=1)
+    p_add.add_argument("--mod-id", dest="mod_id", default="")
+    p_add.add_argument("--mod-count", dest="mod_count", type=int, default=0)
+    p_add.add_argument("--reorder", action="store_true")
+
+    sub.add_parser("cart", add_help=False)
+    sub.add_parser("cart-page", add_help=False)
+
+    p_remove = sub.add_parser("remove", add_help=False)
+    p_remove.add_argument("index", type=int)
+
+    sub.add_parser("submit", add_help=False)
+    sub.add_parser("account", add_help=False)
+    sub.add_parser("receipt", add_help=False)
+
+    p_call = sub.add_parser("call", add_help=False)
+    p_call.add_argument("target", nargs="?", choices=("staff", "dessert"), default="staff")
+
+    sub.add_parser("menu", add_help=False)
+    sub.add_parser("history", add_help=False)
+
+    p_reorder = sub.add_parser("reorder", add_help=False)
+    p_reorder.add_argument("code")
+
+    sub.add_parser("alcohol", add_help=False)
+
+    p_check = sub.add_parser("check", add_help=False)
+    p_check.add_argument("target", choices=("order", "last", "midnight"))
+
+    sub.add_parser("help", add_help=False)
+    sub.add_parser("exit", add_help=False)
+    sub.add_parser("quit", add_help=False)
+
+    return parser
 
 
-def _require_arg(args: Sequence[str], index: int, name: str) -> str:
-    if index >= len(args) or not args[index]:
-        msg = f"{name} is required"
-        raise ValueError(msg)
-    return args[index]
+_REPL_PARSER = _build_repl_parser()
 
 
-def _run_command(client: SaizeriyaClient, args: list[str]) -> str:  # noqa: C901, PLR0911, PLR0912, PLR0915
+def _run_command(client: SaizeriyaClient, args: list[str]) -> str:  # noqa: C901, PLR0912
     if not args:
         return "continue"
-    command = args[0]
+
+    try:
+        ns = _REPL_PARSER.parse_args(args)
+    except _ReplParseError as exc:
+        raise ValueError(str(exc)) from exc
+
+    command: str = ns.command
 
     if command == "help":
         print(USAGE)  # noqa: T201
@@ -227,89 +280,53 @@ def _run_command(client: SaizeriyaClient, args: list[str]) -> str:  # noqa: C901
         return "exit"
     if command == "state":
         _print_state(client.get_state())
-        return "continue"
-    if command == "people":
-        count = int(_require_arg(args, 1, "count"))
-        _print_state(client.set_people_count(count))
-        return "continue"
-    if command == "lookup":
-        _print_lookup(client.lookup_item(_require_arg(args, 1, "code")))
-        return "continue"
-    if command == "add":
-        code = _require_arg(args, 1, "code")
-        count = 1
-        if len(args) >= 3 and not args[2].startswith("--"):  # noqa: PLR2004
-            count = int(args[2])
-        mod_id = ""
-        if "--mod-id" in args:
-            mi = args.index("--mod-id")
-            if mi + 1 < len(args):
-                mod_id = args[mi + 1]
-        mod_count = _parse_int_option(args, "--mod-count") or 0
-        reorder = "--reorder" in args
+    elif command == "people":
+        _print_state(client.set_people_count(ns.count))
+    elif command == "lookup":
+        _print_lookup(client.lookup_item(ns.code))
+    elif command == "add":
         _print_state(
             client.add_item(
-                code,
-                count=count,
-                mod_id=mod_id,
-                mod_count=mod_count,
-                reorder=reorder,
+                ns.code,
+                count=ns.count,
+                mod_id=ns.mod_id,
+                mod_count=ns.mod_count,
+                reorder=ns.reorder,
             ),
         )
-        return "continue"
-    if command == "cart":
+    elif command == "cart":
         _print_cart(client.get_state())
-        return "continue"
-    if command == "cart-page":
+    elif command == "cart-page":
         _print_state(client.go_to_cart())
-        return "continue"
-    if command == "remove":
-        idx = int(_require_arg(args, 1, "index")) - 1
-        _print_state(client.remove_cart_item(idx))
-        return "continue"
-    if command == "submit":
+    elif command == "remove":
+        _print_state(client.remove_cart_item(ns.index - 1))
+    elif command == "submit":
         _print_state(client.submit_order())
-        return "continue"
-    if command == "account":
+    elif command == "account":
         _, account = client.get_account()
         _print_account(account)
-        return "continue"
-    if command == "receipt":
+    elif command == "receipt":
         _, account, _ = client.get_receipt()
         _print_account(account)
-        return "continue"
-    if command == "call":
-        target = args[1] if len(args) > 1 else "staff"
-        result = client.call_dessert() if target == "dessert" else client.call_staff()
+    elif command == "call":
+        result = client.call_dessert() if ns.target == "dessert" else client.call_staff()
         print(result)  # noqa: T201
-        return "continue"
-    if command == "menu":
+    elif command == "menu":
         _print_state(client.go_to_menu())
-        return "continue"
-    if command == "history":
+    elif command == "history":
         _print_state(client.go_to_history())
-        return "continue"
-    if command == "reorder":
-        _print_state(client.reorder(_require_arg(args, 1, "code")))
-        return "continue"
-    if command == "alcohol":
+    elif command == "reorder":
+        _print_state(client.reorder(ns.code))
+    elif command == "alcohol":
         print(client.confirm_alcohol())  # noqa: T201
-        return "continue"
-    if command == "check":
-        target = _require_arg(args, 1, "target")
-        if target == "order":
+    elif command == "check":
+        if ns.target == "order":
             print(client.check_order_started())  # noqa: T201
-        elif target == "last":
+        elif ns.target == "last":
             print(client.check_last_order())  # noqa: T201
-        elif target == "midnight":
-            print(client.check_midnight())  # noqa: T201
         else:
-            msg = "target must be order, last, or midnight"
-            raise ValueError(msg)
-        return "continue"
-
-    msg = f"Unknown command: {command}"
-    raise ValueError(msg)
+            print(client.check_midnight())  # noqa: T201
+    return "continue"
 
 
 def _run_repl(name: str, client: SaizeriyaClient, http: httpx.Client, created_at: int) -> None:
@@ -335,15 +352,12 @@ def _run_repl(name: str, client: SaizeriyaClient, http: httpx.Client, created_at
             print(str(exc), file=sys.stderr)  # noqa: T201
 
 
-def _cmd_start(args: list[str]) -> None:
-    name = _require_arg(args, 0, "name")
-    qr_url = _require_arg(args, 1, "qrurl")
-    people_count = _parse_int_option(args, "--people")
+def _cmd_start(ns: argparse.Namespace) -> None:
     http = _make_http()
     try:
         client = SaizeriyaClient(
-            qr_url_source=qr_url,
-            people_count=people_count,
+            qr_url_source=ns.qrurl,
+            people_count=ns.people_count,
             http=http,
         )
     except Exception:
@@ -352,20 +366,19 @@ def _cmd_start(args: list[str]) -> None:
 
     created_at = int(time.time() * 1000)
     try:
-        _save_session(name, http, client, created_at)
+        _save_session(ns.name, http, client, created_at)
         _print_state(client.get_state())
-        _run_repl(name, client, http, created_at)
+        _run_repl(ns.name, client, http, created_at)
     finally:
         with contextlib.suppress(Exception):
             http.close()
 
 
-def _cmd_use(args: list[str]) -> None:
-    name = _require_arg(args, 0, "name")
+def _cmd_use(ns: argparse.Namespace) -> None:
     sessions = _read_sessions()
-    snapshot = sessions.get(name)
+    snapshot = sessions.get(ns.name)
     if not snapshot:
-        msg = f"Session not found: {name}"
+        msg = f"Session not found: {ns.name}"
         raise ValueError(msg)
 
     http = _make_http(snapshot.get("cookies", []))
@@ -374,7 +387,7 @@ def _cmd_use(args: list[str]) -> None:
         client = SaizeriyaClient(initial_state=state, http=http)
         _print_state(client.get_state())
         _run_repl(
-            name,
+            ns.name,
             client,
             http,
             int(snapshot.get("createdAt", time.time() * 1000)),
@@ -396,60 +409,53 @@ def _cmd_list() -> None:
         )
 
 
-def _cmd_rm(args: list[str]) -> None:
-    name = _require_arg(args, 0, "name")
+def _cmd_rm(ns: argparse.Namespace) -> None:
     sessions = _read_sessions()
-    sessions.pop(name, None)
+    sessions.pop(ns.name, None)
     _write_sessions(sessions)
-    print(f"Removed {name}")  # noqa: T201
+    print(f"Removed {ns.name}")  # noqa: T201
 
 
-def _collect_repeat_option(args: list[str], name: str) -> list[str]:
-    values: list[str] = []
-    cursor = 0
-    while cursor < len(args):
-        if args[cursor] == name:
-            if cursor + 1 >= len(args):
-                msg = f"{name} requires a value"
-                raise ValueError(msg)
-            values.append(args[cursor + 1])
-            cursor += 2
-        else:
-            cursor += 1
-    return values
-
-
-def _string_option(args: list[str], name: str) -> str | None:
-    if name not in args:
-        return None
-    index = args.index(name)
-    if index + 1 >= len(args):
-        msg = f"{name} requires a value"
-        raise ValueError(msg)
-    return args[index + 1]
-
-
-def _cmd_fetch_menu(args: list[str]) -> None:
-    out_raw = _string_option(args, "--out")
-    out = Path(out_raw) if out_raw is not None else fetch_menu.DEFAULT_OUTPUT
-    max_code = _parse_int_option(args, "--max-code")
-    if max_code is None:
-        max_code = fetch_menu.DEFAULT_ITEM_CODE_COUNT
-    table_no = _string_option(args, "--table-no") or fetch_menu.DEFAULT_TABLE_NO
-    language = _string_option(args, "--lng") or fetch_menu.DEFAULT_LANGUAGE
-    people = _string_option(args, "--people") or fetch_menu.DEFAULT_PEOPLE_COUNT
-    shops = _collect_repeat_option(args, "--shop") or list(fetch_menu.SHOPS)
-    shuffle = "--no-shuffle" not in args
-
+def _cmd_fetch_menu(ns: argparse.Namespace) -> None:
+    shops = ns.shops or list(fetch_menu.SHOPS)
     fetch_menu.crawl(
         shops=shops,
-        out=out,
-        item_code_count=max_code,
-        table_no=table_no,
-        language=language,
-        people_count=people,
-        shuffle=shuffle,
+        out=ns.out,
+        item_code_count=ns.max_code,
+        table_no=ns.table_no,
+        language=ns.lng,
+        people_count=ns.people,
+        shuffle=not ns.no_shuffle,
     )
+
+
+def _build_top_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(prog="saizeriya", description="Saizeriya order CLI.")
+    sub = parser.add_subparsers(dest="command", metavar="<command>")
+
+    p_start = sub.add_parser("start", help="Start a new ordering session")
+    p_start.add_argument("name")
+    p_start.add_argument("qrurl")
+    p_start.add_argument("--people", dest="people_count", type=int, default=None)
+
+    p_use = sub.add_parser("use", help="Resume a saved session")
+    p_use.add_argument("name")
+
+    sub.add_parser("list", help="List saved sessions")
+
+    p_rm = sub.add_parser("rm", help="Remove a saved session")
+    p_rm.add_argument("name")
+
+    p_fetch = sub.add_parser("fetch-menu", help="Crawl menu data for shops")
+    p_fetch.add_argument("--out", type=Path, default=fetch_menu.DEFAULT_OUTPUT)
+    p_fetch.add_argument("--shop", action="append", dest="shops", default=None)
+    p_fetch.add_argument("--max-code", dest="max_code", type=int, default=fetch_menu.DEFAULT_ITEM_CODE_COUNT)
+    p_fetch.add_argument("--table-no", dest="table_no", default=fetch_menu.DEFAULT_TABLE_NO)
+    p_fetch.add_argument("--people", default=fetch_menu.DEFAULT_PEOPLE_COUNT)
+    p_fetch.add_argument("--lng", default=fetch_menu.DEFAULT_LANGUAGE)
+    p_fetch.add_argument("--no-shuffle", dest="no_shuffle", action="store_true")
+
+    return parser
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -457,25 +463,29 @@ def main(argv: list[str] | None = None) -> None:
     if argv is None:
         argv = sys.argv[1:]
 
-    if not argv or argv[0] in ("help", "--help", "-h"):
-        print(USAGE)  # noqa: T201
+    if not argv or argv[0] == "help":
+        parser = _build_top_parser()
+        parser.print_help()
         return
 
-    command, *rest = argv
+    parser = _build_top_parser()
+    ns = parser.parse_args(argv)
+
+    if ns.command is None:
+        parser.print_help()
+        return
+
     try:
-        if command == "start":
-            _cmd_start(rest)
-        elif command == "use":
-            _cmd_use(rest)
-        elif command == "list":
+        if ns.command == "start":
+            _cmd_start(ns)
+        elif ns.command == "use":
+            _cmd_use(ns)
+        elif ns.command == "list":
             _cmd_list()
-        elif command == "rm":
-            _cmd_rm(rest)
-        elif command == "fetch-menu":
-            _cmd_fetch_menu(rest)
-        else:
-            msg = f"Unknown command: {command}"
-            raise ValueError(msg)  # noqa: TRY301
+        elif ns.command == "rm":
+            _cmd_rm(ns)
+        elif ns.command == "fetch-menu":
+            _cmd_fetch_menu(ns)
     except Exception as exc:  # noqa: BLE001
         print(str(exc), file=sys.stderr)  # noqa: T201
         sys.exit(1)

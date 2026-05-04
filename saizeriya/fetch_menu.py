@@ -1,7 +1,6 @@
 """Crawl Saizeriya's per-shop menu by probing item codes.
 
-Mirrors `nodejs/saizeriya/scripts/get-all-menu.ts`: POSTs to the
-`saizeriya2/src/cmd/get_item.php` endpoint for every (shop, item code) pair,
+POSTs to the `saizeriya2/src/cmd/get_item.php` endpoint for every (shop, item code) pair,
 appending discovered items to a JSON file that can be resumed across runs.
 """
 

@@ -53,13 +53,54 @@ positional arguments:
 options:
   -h, --help    show this help message and exit
 ```
+To start session named `lunch` and ener REPL:
+
+```bash
+saizeriya start lunch "https://ioes03.saizeriya.co.jp/saizeriya3/?..."
+```
+
+After start/use, available commands in REPL:
+
+```text
+state
+people <count>
+lookup <code>
+add <code> [count] [--mod-id <id>] [--mod-count <count>] [--reorder]
+cart
+cart-page
+remove <index>
+submit
+account
+receipt
+call [staff|dessert]
+menu
+history
+reorder <code>
+alcohol
+check <order|last|midnight>
+help
+exit
+```
 
 ### Library
 
 ```python
 import saizeriya
 
+# check version
 print(saizeriya.__version__)
+
+# create client instance
+client = new SaizeriyaClient(
+  qr_url_source="https://example.com/saizeriya3/qr",
+  people_count=2,
+)
+
+# add new item to cart
+in_cart_items = client.add_item('1202').cart
+
+# check in-cart items
+print(in_cart_items)
 ```
 
 ### Docker

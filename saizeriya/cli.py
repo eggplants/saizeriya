@@ -259,16 +259,7 @@ def _run_command(client: SaizeriyaClient, args: list[str]) -> str:  # noqa: C901
         print(  # noqa: T201
             textwrap.dedent(
                 """
-                Usage:
-                  saizeriya start <name> <qr_url> [--people <count>]
-                  saizeriya use <name>
-                  saizeriya list
-                  saizeriya rm <name>
-                  saizeriya fetch-menu [--out <path>] [--shop <id>]... [--max-code <n>]
-                                       [--table-no <n>] [--people <n>] [--lng <n>]
-                                       [--no-shuffle]
-
-                After start/use, available commands:
+                Available commands:
                   state
                   people <count>
                   lookup <code>
@@ -452,26 +443,51 @@ def _build_top_parser() -> argparse.ArgumentParser:
     sub = parser.add_subparsers(dest="command", metavar="<command>")
 
     p_start = sub.add_parser("start", help="Start a new ordering session")
-    p_start.add_argument("name")
-    p_start.add_argument("qr_url")
-    p_start.add_argument("--people", dest="people_count", type=int, default=None)
+    p_start.add_argument("name", help="Session name")
+    p_start.add_argument("qr_url", help="QR code URL shown at the in-store table")
+    p_start.add_argument("--people", dest="people_count", type=int, default=None, help="Number of people at the table")
 
     p_use = sub.add_parser("use", help="Resume a saved session")
-    p_use.add_argument("name")
+    p_use.add_argument("name", help="Session name")
 
     sub.add_parser("list", help="List saved sessions")
 
     p_rm = sub.add_parser("rm", help="Remove a saved session")
-    p_rm.add_argument("name")
+    p_rm.add_argument("name", help="Session name")
 
     p_fetch = sub.add_parser("fetch-menu", help="Crawl menu data for shops")
-    p_fetch.add_argument("--out", type=Path, default=fetch_menu.DEFAULT_OUTPUT)
-    p_fetch.add_argument("--shop", action="append", dest="shops", default=None)
-    p_fetch.add_argument("--max-code", dest="max_code", type=int, default=fetch_menu.DEFAULT_ITEM_CODE_COUNT)
-    p_fetch.add_argument("--table-no", dest="table_no", default=fetch_menu.DEFAULT_TABLE_NO)
-    p_fetch.add_argument("--people", default=fetch_menu.DEFAULT_PEOPLE_COUNT)
-    p_fetch.add_argument("--lng", default=fetch_menu.DEFAULT_LANGUAGE)
-    p_fetch.add_argument("--no-shuffle", dest="no_shuffle", action="store_true")
+    p_fetch.add_argument(
+        "--out", type=Path, default=fetch_menu.DEFAULT_OUTPUT, help="Output JSON file path (default: %(default)s)"
+    )
+    p_fetch.add_argument(
+        "--shop",
+        action="append",
+        dest="shops",
+        default=None,
+        help="Shop code to crawl; may be repeated (default: all shops)",
+    )
+    p_fetch.add_argument(
+        "--max-code",
+        dest="max_code",
+        type=int,
+        default=fetch_menu.DEFAULT_ITEM_CODE_COUNT,
+        help="Maximum item code to probe (default: %(default)s)",
+    )
+    p_fetch.add_argument(
+        "--table-no",
+        dest="table_no",
+        default=fetch_menu.DEFAULT_TABLE_NO,
+        help="Table number sent in requests (default: %(default)s)",
+    )
+    p_fetch.add_argument(
+        "--people", default=fetch_menu.DEFAULT_PEOPLE_COUNT, help="People count sent in requests (default: %(default)s)"
+    )
+    p_fetch.add_argument(
+        "--lng", default=fetch_menu.DEFAULT_LANGUAGE, help="Language code for item names (default: %(default)s)"
+    )
+    p_fetch.add_argument(
+        "--no-shuffle", dest="no_shuffle", action="store_true", help="Disable random shuffle of shop and code order"
+    )
 
     return parser
 

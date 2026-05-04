@@ -3,8 +3,10 @@
   "words": [
     "asyncio",
     "beautifulsoup",
+    "distroless",
     "httpx",
     "lxml",
+    "nonroot",
     "pdoc",
     "pydocstyle",
     "pymarkdownlnt",

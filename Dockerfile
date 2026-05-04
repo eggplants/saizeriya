@@ -1,17 +1,26 @@
-FROM python:3.14-slim@sha256:5b3879b6f3cb77e712644d50262d05a7c146b7312d784a18eff7ff5462e77033
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
+FROM debian:12-slim@sha256:f9c6a2fd2ddbc23e336b6257a5245e31f996953ef06cd13a59fa0a1df2d5c252 AS builder
 
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+RUN --mount=type=bind,source=.,target=/app \
+    --mount=from=ghcr.io/astral-sh/uv,source=/uv,target=/usr/bin/uv \
+    --mount=type=cache,target=/root/.cache/uv \
+    <<EOF
 
-COPY . /app
+    set -eux
 
-ENV UV_COMPILE_BYTECODE=1
-ENV UV_LINK_MODE=copy
-ENV UV_NO_DEV=1
-ENV PYTHONUNBUFFERED=1
+    export UV_PYTHON_DOWNLOADS=manual
+    uv python install --project=/app --managed-python --install-dir=/tmp/python
 
-WORKDIR /app
-RUN uv sync --locked --no-dev
+    (cd /tmp/python/* && tar -cf- .) | (cd /usr/local && tar -xf-)
+    rm -r /tmp/python
 
-ENV PATH="/app/.venv/bin:$PATH"
-CMD ["uv", "run", "saizeriya"]
+    export UV_PROJECT_ENVIRONMENT=/usr/local
+    uv sync --project=/app --frozen --compile-bytecode --link-mode=copy --no-dev --no-editable --no-managed-python
+EOF
+
+FROM gcr.io/distroless/cc-debian12:nonroot@sha256:e2d29aec8061843706b7e484c444f78fafb05bfe47745505252b1769a05d14f1
+
+COPY --from=builder /usr/local /usr/local
+
+USER nonroot
+
+ENTRYPOINT ["/usr/local/bin/saizeriya"]

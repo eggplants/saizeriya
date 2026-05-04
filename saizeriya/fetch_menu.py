@@ -4,8 +4,6 @@ POSTs to the `saizeriya2/src/cmd/get_item.php` endpoint for every (shop, item co
 appending discovered items to a JSON file that can be resumed across runs.
 """
 
-from __future__ import annotations
-
 import json
 import logging
 import random

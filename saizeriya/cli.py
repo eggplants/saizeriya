@@ -1,7 +1,5 @@
 """Interactive CLI for `saizeriya`."""
 
-from __future__ import annotations
-
 import argparse
 import contextlib
 import json
@@ -352,7 +350,7 @@ def _run_repl(name: str, client: SaizeriyaClient, http: httpx.Client, created_at
     while True:
         try:
             line = input(prompt)
-        except (EOFError, KeyboardInterrupt):
+        except EOFError, KeyboardInterrupt:
             sys.stdout.write("\n")
             break
         try:

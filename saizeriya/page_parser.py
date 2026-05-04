@@ -1,7 +1,5 @@
 """HTML parsing for Saizeriya's ordering pages."""
 
-from __future__ import annotations
-
 import re
 from typing import cast, get_args
 

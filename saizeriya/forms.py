@@ -1,7 +1,5 @@
 """Helpers to build URL-encoded form payloads sent to the ordering pages."""
 
-from __future__ import annotations
-
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 from urllib.parse import urlencode

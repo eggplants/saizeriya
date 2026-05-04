@@ -1,7 +1,5 @@
 """Synchronous client for Saizeriya's mobile ordering pages."""
 
-from __future__ import annotations
-
 import copy
 import re
 from typing import TYPE_CHECKING, Any

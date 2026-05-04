@@ -14,6 +14,14 @@
   <https://github.com/eggplants/saizeriya/actions/workflows/ci.yml>
 )
 
+[![ghcr latest](
+  <https://ghcr-badge.egpl.dev/eggplants/saizeriya/latest_tag?trim=major&label=latest>
+ ) ![ghcr size](
+  <https://ghcr-badge.egpl.dev/eggplants/saizeriya/size>
+)](
+  <https://github.com/eggplants/saizeriya/pkgs/container/saizeriya>
+)
+
 Unofficial [Saizeriya](https://www.saizeriya.co.jp/) Client, inspired by [saizeriya.js](https://www.npmjs.com/package/saizeriya.js)
 
 ## Installation

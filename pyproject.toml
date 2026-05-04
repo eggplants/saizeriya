@@ -1,0 +1,80 @@
+[build-system]
+build-backend = "hatchling.build"
+requires = [ "hatchling", "uv-dynamic-versioning" ]
+
+[project]
+name = "saizeriya"
+description = "Unofficial Saizeriya Client"
+readme = "README.md"
+keywords = [ "saizeriya" ]
+license = "MIT"
+authors = [ { name = "eggplants", email = "w10776e8w@yahoo.co.jp" } ]
+requires-python = ">=3.10,<4"
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Typing :: Typed",
+]
+dynamic = [ "version" ]
+dependencies = [
+  "beautifulsoup4>=4.12",
+  "httpx>=0.28.1",
+  "lxml>=5",
+]
+urls.repository = "https://github.com/eggplants/saizeriya"
+scripts.saizeriya = "saizeriya.cli:main"
+
+[dependency-groups]
+dev = [
+  "pymarkdownlnt>=0.9.33",
+  "pyproject-fmt>=2.11.1",
+  "pytest>=9.0.2",
+  "pytest-asyncio>=1.3",
+  "pytest-cov>=7",
+]
+docs = [
+  "pdoc>=16",
+]
+
+[tool.hatch]
+build.targets.sdist.include = [ "saizeriya" ]
+build.targets.wheel.include = [ "saizeriya" ]
+version.source = "uv-dynamic-versioning"
+
+[tool.uv]
+python-downloads = "never"
+default-groups = [
+  "dev",
+  "docs",
+]
+exclude-newer = "P7D"
+preview = true
+
+[tool.ruff]
+line-length = 120
+format.indent-style = "space"
+format.quote-style = "double"
+lint.select = [
+  "ALL",
+]
+lint.ignore = [
+  "COM812",
+  "D203",
+  "D213",
+]
+lint.per-file-ignores."tests/test_*.py" = [
+  "D",
+  "S101", # Use of assert detected
+]
+lint.pydocstyle.convention = "google"
+
+[tool.uv-dynamic-versioning]
+vcs = "git"
+style = "semver"
+fallback-version = "0.0.0"

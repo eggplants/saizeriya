@@ -1,0 +1,31 @@
+""".. include:: ../README.md"""  # noqa: D415
+
+from __future__ import annotations
+
+import importlib.metadata
+
+from .client import SaizeriyaClient
+from .types import (
+    AccountLine,
+    AccountSummary,
+    CartItem,
+    ClientState,
+    PageKind,
+    ReceiptSummary,
+)
+
+try:
+    __version__ = importlib.metadata.version(__name__)
+except importlib.metadata.PackageNotFoundError:
+    __version__ = "0.0.0"
+
+__all__ = [
+    "AccountLine",
+    "AccountSummary",
+    "CartItem",
+    "ClientState",
+    "PageKind",
+    "ReceiptSummary",
+    "SaizeriyaClient",
+    "__version__",
+]

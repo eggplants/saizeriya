@@ -1,0 +1,32 @@
+{
+  "language": "en_US",
+  "words": [
+    "asyncio",
+    "beautifulsoup",
+    "httpx",
+    "lxml",
+    "pdoc",
+    "pydocstyle",
+    "pymarkdownlnt",
+    "pyproject",
+    "pytest",
+    "saizeriya",
+    "sdist"
+  ],
+  "dictionaries": [
+    "companies",
+    "markdown",
+    "misc",
+    "softwareTerms",
+    "useCompounds"
+  ],
+  "ignorePaths": [
+    ".gitignore",
+    ".cspell.json",
+    ".devcontainer/devcontainer.json"
+  ],
+  "features": {
+    "weighted-suggestions": true
+  },
+  "useGitignore": true
+}

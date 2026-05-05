@@ -129,7 +129,12 @@ print(in_cart_items)
 
 ### Mock server (`saizeriya._mock`)
 
-Run `mise run mock`, then visit <http://localhost:8080/>.
+```bash
+pip install saizeriya[mock]
+saizeriya-mock-server
+```
+
+Then, visit <http://localhost:8080/>.
 
 ## License
 

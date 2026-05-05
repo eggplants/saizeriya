@@ -25,6 +25,7 @@ dependencies = [
 ]
 urls.repository = "https://github.com/eggplants/saizeriya"
 scripts.saizeriya = "saizeriya.cli:main"
+scripts.saizeriya-mock-server = "saizeriya._mock:main"
 
 [dependency-groups]
 dev = [

@@ -39,6 +39,7 @@ docs = [
   "pdoc>=16",
 ]
 mock = [
+  "python-barcode>=0.16.1",
   "python-multipart>=0.0.27",
   "starlette>=1",
   "tdom>=0.1.15",

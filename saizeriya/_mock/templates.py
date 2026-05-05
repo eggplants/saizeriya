@@ -3,11 +3,15 @@
 from __future__ import annotations
 
 import json
+import re
 import textwrap
 from dataclasses import dataclass
+from io import BytesIO
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import barcode
+from barcode.writer import SVGWriter
 from tdom import Markup, html
 from tdom.template_utils import template_from_parts
 
@@ -415,25 +419,29 @@ def render_account_page(ctx: RenderContext, lines: list[OrderDisplayLine]) -> st
     return _shell(ctx, "お会計内容", "", body)
 
 
-_BARCODE_IMG_SRC = (
-    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMoAAAAeCAQAAACd/awtAAAAMUlEQVR42u3PMQEAAAgD"
-    "oJvc6FELC4EwSUJCQkJCQkJCQkJCQkJCQkJCQkJCQkKuAX6DAAFs7hJXAAAAAElFTkSuQmCC"
-)
+def _barcode_svg(value: str) -> str:
+    """Return an inline SVG string for a Code128 barcode."""
+    code = barcode.get("code128", value, writer=SVGWriter())
+    buf = BytesIO()
+    code.write(buf, options={"write_text": False})
+    svg_raw = buf.getvalue().decode()
+    match = re.search(r"<svg[\s\S]*</svg>", svg_raw)
+    return match.group() if match else ""
 
 
-def render_receipt_page(ctx: RenderContext, barcode: str) -> str:
+def render_receipt_page(ctx: RenderContext, barcode_value: str) -> str:
     """Render the receipt page with barcode value."""
     logo = Markup(_brand_logo(compact=True))
     table_no = ctx.table_no
-    img_src = Markup(_BARCODE_IMG_SRC)
+    barcode_svg = Markup(_barcode_svg(barcode_value))
     body = html(
         t_dedent(t"""
         <div id="body-section">
             <p class="table">{table_no}</p>
             <div class="logo">{logo}</div>
             <div class="barcode">
-                <img src="{img_src}" alt="" />
-                <p>{barcode}</p>
+                {barcode_svg}
+                <p>{barcode_value}</p>
             </div>
             <p class="comment align-justify">この画面をレジで提示ください。</p>
             <p class="comment2">この画面は、お会計後に閉じられます。</p>

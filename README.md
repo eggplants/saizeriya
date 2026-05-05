@@ -115,7 +115,7 @@ import saizeriya
 print(saizeriya.__version__)
 
 # create client instance
-client = new SaizeriyaClient(
+client = saizeriya.SaizeriyaClient(
   qr_url_source="https://example.com/saizeriya3/qr",
   people_count=2,
 )

@@ -34,6 +34,12 @@ pipx install saizeriya
 
 ## Usage
 
+### Docker
+
+```shellsession
+docker run --rm -it ghcr.io/eggplants/saizeriya
+```
+
 ### CLI
 
 ```shellsession
@@ -124,12 +130,6 @@ print(in_cart_items)
 ### Mock server (`saizeriya._mock`)
 
 Run `mise run mock`, then visit <http://localhost:8080/>.
-
-### Docker
-
-```shellsession
-docker run --rm -it ghcr.io/eggplants/saizeriya
-```
 
 ## License
 

@@ -1,0 +1,46 @@
+body { margin: 0; font-family: system-ui, sans-serif; color: #202124; background: #f7f7f3; }
+.off-canvas-wrap, .inner-wrap { min-height: 100vh; }
+form { max-width: 560px; min-height: 100vh; margin: 0 auto; background: #fff; }
+#header { padding: 18px 20px; border-bottom: 1px solid #e4e1d8; background: #fefdf9; }
+h1 { margin: 0; font-size: 20px; font-weight: 700; }
+#body-section { padding: 22px 20px; }
+.logo { text-align: center; margin: 18px 0; }
+.brand-logo { max-width: 260px; width: 70%; height: auto; }
+.brand-logo.compact { max-width: 80px; }
+.btn, button, .button { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 18px; border: 1px solid #1f7a4f; border-radius: 6px; background: #238957; color: #fff; font: inherit; text-decoration: none; cursor: pointer; }
+.text { color: inherit; background: transparent; border-color: #dedbd1; }
+.base, .list-base, .amount { margin: 16px 0; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 10px 8px; border-bottom: 1px solid #e8e3da; text-align: left; }
+td:nth-child(2), td:nth-child(3), th:nth-child(2), th:nth-child(3) { text-align: right; }
+.amount { display: flex; justify-content: space-between; gap: 16px; font-weight: 700; }
+.barcode { text-align: center; margin: 20px 0; }
+.barcode img { max-width: 260px; width: 80%; height: 40px; object-fit: contain; }
+.table { text-align: center; font-size: 28px; font-weight: 700; }
+.number input { font: inherit; font-size: 28px; width: 4em; text-align: center; }
+.command, .main, .mod, .detail { margin: 12px 0; }
+.menu .command, .detail .command { display: flex; gap: 10px; align-items: center; }
+.menu .command .name { flex: 1; min-height: 44px; display: flex; align-items: center; padding: 0 14px; border: 1px solid #dedbd1; border-radius: 6px; background: #fbfaf6; }
+.menu .code { margin: 12px 0; }
+.menu .code p { min-height: 48px; margin: 0; display: flex; align-items: center; justify-content: center; border: 1px solid #dedbd1; border-radius: 6px; background: #fff; font-size: 28px; letter-spacing: 0.08em; }
+.tenkey ul { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 0; margin: 12px 0 0; list-style: none; }
+.tenkey li { min-height: 48px; display: flex; align-items: center; justify-content: center; border: 1px solid #d6d3c8; border-radius: 6px; background: #f3f1ea; color: #202124; }
+.tenkey li.clear { background: transparent; border-color: transparent; }
+.notice-balloon, #guide { margin-top: 12px; }
+.msg-base { display: flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border: 1px solid #e6dfcd; border-radius: 6px; background: #fff8e7; color: #6a5730; }
+.balloon-arrow { width: 0; height: 0; margin-left: 14px; border-left: 8px solid transparent; border-right: 8px solid transparent; border-bottom: 8px solid #e6dfcd; }
+.detail .main, .detail .mod { padding: 14px; border: 1px solid #e4e1d8; border-radius: 6px; background: #fcfbf7; }
+.detail dl.name { display: flex; justify-content: space-between; gap: 12px; margin: 0 0 12px; }
+.detail dl.name dt, .detail dl.name dd { margin: 0; }
+.detail ul.amount { display: grid; grid-template-columns: 52px 1fr 52px; gap: 8px; padding: 0; margin: 0; list-style: none; align-items: center; }
+.detail ul.amount .cmd { min-height: 44px; display: flex; align-items: center; justify-content: center; border: 1px solid #d6d3c8; border-radius: 6px; background: #f3f1ea; font-size: 24px; }
+.detail ul.amount input { width: 100%; min-height: 44px; border: 1px solid #dedbd1; border-radius: 6px; background: #fff; text-align: center; font: inherit; }
+.detail .command .btn { flex: 1; }
+#footer { position: sticky; bottom: 0; background: #fff; border-top: 1px solid #e4e1d8; }
+#footer ul#menu { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; margin: 0; padding: 0; list-style: none; }
+#footer li { min-width: 0; border-left: 1px solid #ece7de; }
+#footer li:first-child { border-left: 0; }
+#footer button { width: 100%; min-height: 60px; padding: 6px 2px; border: 0; border-radius: 0; background: #fbfaf6; color: #383a37; font-size: 12px; line-height: 1.25; }
+#footer p { margin: 0; }
+#footer li.selected button { background: #238957; color: #fff; }
+#footer li.disabled button { opacity: 0.55; }

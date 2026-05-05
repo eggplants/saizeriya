@@ -25,8 +25,7 @@ from .types import (
 
 if TYPE_CHECKING:
     from types import TracebackType
-
-    from typing_extensions import Self
+    from typing import Self
 
 _CODE_PATTERN = re.compile(r"^\d{4}$")
 
@@ -76,8 +75,6 @@ class SaizeriyaClient:
         if people_count is not None:
             self.set_people_count(people_count)
 
-    # ----- lifecycle -----
-
     def close(self) -> None:
         """Close the underlying HTTP client when owned by this instance."""
         if self._owns_http:
@@ -94,8 +91,6 @@ class SaizeriyaClient:
     ) -> None:
         self.close()
 
-    # ----- state inspection -----
-
     def get_state(self) -> ClientState:
         """Return a deep copy of the current client state."""
         return ClientState(
@@ -109,8 +104,6 @@ class SaizeriyaClient:
             session_id=self._state.session_id,
             cart=[copy.copy(item) for item in self._state.cart],
         )
-
-    # ----- internals -----
 
     def _command_url(self, path: str) -> str:
         return urljoin(self._state.base_url, path)
@@ -162,8 +155,6 @@ class SaizeriyaClient:
                 "ctrl": "forced" if forced else "",
             }
         )
-
-    # ----- public actions -----
 
     def set_people_count(self, count: int) -> ClientState:
         """Set the number of people for this table."""
@@ -239,7 +230,7 @@ class SaizeriyaClient:
             {
                 **create_base_fields("main", self._require_token()),
                 "ctrl": "add",
-                "ord-drkbar-cnt": "0",  # cspell:words drkbar
+                "ord-drkbar-cnt": "0",
                 "is_reorder": "1" if reorder else "0",
                 "order-time": now_order_time(),
                 "code": code,
@@ -279,9 +270,9 @@ class SaizeriyaClient:
                 **create_base_fields("history", self._state.token),
                 "ctrl": "remember",
                 "code": "",
-                "drinkbar-cnt": "0",  # cspell:words drinkbar
+                "drinkbar-cnt": "0",
                 "alcohol-cnt": "0",
-                "ord-drkbar-cnt": "0",  # cspell:words drkbar
+                "ord-drkbar-cnt": "0",
             }
         )
         return self.get_state()
@@ -375,7 +366,7 @@ class SaizeriyaClient:
     def check_last_order(self) -> dict[str, Any]:
         """Check the last-order time window."""
         return self._post_json(
-            "./src/cmd/check_lastorder.php",  # cspell:words lastorder
+            "./src/cmd/check_lastorder.php",
             {"sid": self._state.shop_id},
         )
 

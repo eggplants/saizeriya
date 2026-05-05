@@ -4,7 +4,10 @@
     "asyncio",
     "beautifulsoup",
     "distroless",
+    "drinkbar",
+    "drkbar",
     "httpx",
+    "lastorder",
     "lxml",
     "nonroot",
     "pdoc",
@@ -13,7 +16,12 @@
     "pyproject",
     "pytest",
     "saizeriya",
-    "sdist"
+    "sdist",
+    "starlette",
+    "tdom",
+    "templatelib",
+    "tenkey",
+    "uvicorn"
   ],
   "dictionaries": [
     "companies",

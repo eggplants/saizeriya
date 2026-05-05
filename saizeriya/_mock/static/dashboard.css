@@ -1,0 +1,22 @@
+body { font-family: system-ui, sans-serif; margin: 24px; color: #1d1d1f; background: #f7f7f5; }
+h1 { margin: 0 0 16px; font-size: 26px; }
+h2 { margin: 0; font-size: 16px; }
+a { color: #0066cc; }
+form { margin: 0; }
+button, input, select { font: inherit; padding: 6px 8px; border: 1px solid #ccc; border-radius: 4px; }
+button { cursor: pointer; background: #f5f5f5; }
+button:hover { background: #e8e8e8; }
+table { width: 100%; border-collapse: collapse; }
+th, td { border-bottom: 1px solid #ddd; padding: 8px; text-align: left; }
+th { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 0.05em; background: #fafafa; }
+.panel { background: white; border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin: 16px 0; }
+.head { display: flex; justify-content: space-between; gap: 16px; align-items: baseline; margin-bottom: 2px; }
+.meta { font-size: 13px; color: #888; margin: 0 0 12px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px 12px; align-items: end; margin-top: 10px; }
+.split { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 14px 0 4px; font-size: 14px; }
+.inline { display: flex; gap: 10px; flex-wrap: wrap; align-items: end; margin-top: 10px; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; padding-top: 12px; border-top: 1px solid #eee; }
+.grid > div, .inline > div { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.grid > div:has(> input[type="checkbox"]), .inline > div:has(> input[type="checkbox"]) { flex-direction: row; align-items: center; gap: 6px; padding-bottom: 7px; }
+.grid input:not([type="checkbox"]), .grid select, .inline input:not([type="checkbox"]), .inline select { width: 100%; box-sizing: border-box; }
+label { font-size: 12px; color: #555; }

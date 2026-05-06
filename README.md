@@ -116,7 +116,7 @@ print(saizeriya.__version__)
 
 # create client instance
 client = saizeriya.SaizeriyaClient(
-  qr_url_source="https://example.com/saizeriya3/qr",
+  qr_url_source="https://ioes03.saizeriya.co.jp/saizeriya3/?...",
   people_count=2,
 )
 

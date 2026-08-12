@@ -91,6 +91,7 @@ TUI tests follow the same offline rule: `tests/test_tui_session.py` exposes `mak
 - `mise run ty` is the type-checker (Astral's `ty`, not mypy/pyright) — keep code typed.
 - Python ≥ 3.10 (`from __future__ import annotations` is used throughout).
 - `data/menu-by-shop.json` is the canonical crawl output but is **not** committed; treat it as a local artifact.
+- `packaging/` holds the standalone-binary build: the hand-written `saizeriya.spec` plus the `entrypoint.py` it freezes. The spec **must stay committed** — `.gitignore` blanket-ignores `*.spec`, so it survives only through the explicit `!packaging/saizeriya.spec` negation. `.github/workflows/build-binaries.yml` builds from it; `uv run --with pyinstaller pyinstaller packaging/saizeriya.spec` reproduces the release binary locally.
 
 ## Skills
 

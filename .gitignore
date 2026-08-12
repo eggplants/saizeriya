@@ -34,6 +34,8 @@ MANIFEST
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
+# ...except the hand-written spec the build-binaries workflow builds from.
+!packaging/saizeriya.spec
 
 # Installer logs
 pip-log.txt

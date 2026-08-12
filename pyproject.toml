@@ -80,6 +80,10 @@ lint.ignore = [
   "D203",
   "D213",
 ]
+# Frozen into the binary by PyInstaller; not importable package content.
+lint.per-file-ignores."packaging/entrypoint.py" = [
+  "INP001",
+]
 lint.per-file-ignores."saizeriya/shops.py" = [
   "RUF001",
 ]

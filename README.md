@@ -27,23 +27,29 @@ Unofficial [Saizeriya](https://www.saizeriya.co.jp/) Client, inspired by [saizer
 ## Installation
 
 ```sh
-pip install saizeriya
-# or, (CLI only)
-pipx install saizeriya
+# from mise
+mise use pipx:saizeriya               # CLI only
+mise use 'pipx:saizeriya[extras=tui]' # CLI+TUI
+
+# from pipx
+pipx install saizeriya        # CLI only
+pipx install 'saizeriya[tui]' # CLI+TUI
+
+# from pip
+pip install saizeriya        # CLI only
+pip install 'saizeriya[tui]' # CLI+TUI
 ```
 
 ## Usage
 
-### Docker
-
-```shellsession
-docker run --rm -it ghcr.io/eggplants/saizeriya
-```
-
 ### CLI
 
+<details>
+
+<summary><code>saizeriya --help</code></summary>
+
 ```shellsession
-$ saizeriya
+$ saizeriya --help
 usage: saizeriya [-h] <command> ...
 
 Saizeriya order CLI.
@@ -54,6 +60,7 @@ positional arguments:
     use         Resume a saved session
     list        List saved sessions
     rm          Remove a saved session
+    tui         Launch the Textual TUI (requires the 'tui' extra)
     fetch-menu  Crawl menu data for shops
 
 options:
@@ -104,6 +111,24 @@ To start session named `lunch` and ener REPL:
 
 ```bash
 saizeriya start lunch "https://ioes03.saizeriya.co.jp/saizeriya3/?..."
+```
+
+</details>
+
+### TUI
+
+```bash
+# on the terminal
+saizeriya tui
+
+# on the web
+saizeriya tui --serve
+```
+
+### Docker
+
+```shellsession
+docker run --rm -it ghcr.io/eggplants/saizeriya
 ```
 
 ### Library

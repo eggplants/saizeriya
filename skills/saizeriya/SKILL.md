@@ -23,6 +23,7 @@ saizeriya start <name> <qr_url> [--people <count>]
 saizeriya use <name>
 saizeriya list
 saizeriya rm <name>
+saizeriya tui [<name>] [--serve] [--host <host>] [--port <port>]
 saizeriya fetch-menu [--out <path>] [--shop <id>]... [--max-code <n>]
                      [--table-no <n>] [--people <n>] [--lng <n>]
                      [--no-shuffle]
@@ -32,6 +33,7 @@ saizeriya fetch-menu [--out <path>] [--shop <id>]... [--max-code <n>]
 - `use` — resume a previously-saved session by name (cookies + state are persisted).
 - `list` — print saved sessions (name, last-updated time, table number).
 - `rm` — delete a saved session.
+- `tui` — launch the full-screen Textual UI (needs the `tui` extra: `pipx install 'saizeriya[tui]'`). Pass a session name to resume it on start-up, or `--serve` to host the same UI over HTTP via textual-serve (default `localhost:8000`).
 - `fetch-menu` — crawl per-shop item codes and append findings to a JSON file. Resumable; safe to interrupt.
 
 Sessions are stored under `$SAIZERIYA_CLI_HOME` (default `~/.saizeriya-cli/sessions.json`).
@@ -63,6 +65,23 @@ exit / quit                                 # leave REPL (state is auto-saved)
 
 The REPL auto-saves the session after every successful command, so quitting (or `Ctrl-D`) will not lose progress.
 
+## TUI (`saizeriya tui`)
+
+A Textual front-end over the same sessions, modelled on the `betterzeriya` web client. Sessions are shared with the CLI, so `saizeriya use <name>` and `saizeriya tui <name>` are interchangeable.
+
+Because a terminal has no camera, the QR code is read from an **image file on disk** (a photo or screenshot of the table's QR code) — `QR 画像を読み取る` opens a file picker, or type a path directly. `URL を入力` accepts the QR URL when it is already known.
+
+After confirming the table and the number of people, ordering happens in four tabs:
+
+- `注文追加` — searchable, category-filtered menu (bundled snapshot); `4桁番号` box for direct codes; `ガチャ` (`ctrl+g`) draws a random combination costing exactly a chosen budget. Every pick is verified against the official system first.
+- `注文かご` — quantity `－`/`＋`, delete, running total, `注文送信` (`ctrl+s`).
+- `履歴・会計` — bill lines and totals (`F5` refreshes), `お会計する` shows the register barcode.
+- `店員呼出` — call staff or request dessert service.
+
+`escape` returns to the session list, `ctrl+q` quits.
+
+Lunch-only items are hidden outside weekday lunch hours (before 15:00 JST, Mon–Fri), matching the real menu.
+
 ## Typical flow
 
 1. Scan the table's QR code, copy the URL (looks like `https://ioes.saizeriya.co.jp/saizeriya2/?...`).
@@ -92,5 +111,9 @@ Logging from the crawl goes through Python's `logging` module at `INFO` level; n
 
 - Entry point: `saizeriya/cli.py` (`main`)
 - HTTP client: `saizeriya/client.py` (`SaizeriyaClient`)
+- TUI: `saizeriya/tui/` (`SaizeriyaApp`, `OrderSession`, `read_qr_url`)
+- Menu data and search: `saizeriya/menu.py`, `saizeriya/data/menu.json`
+- Budget gacha: `saizeriya/gacha.py`
+- Session store: `saizeriya/sessions.py`
 - Crawler: `saizeriya/fetch_menu.py` (`crawl`, `fetch_item`)
 - Shop directory: `saizeriya/shops.py`

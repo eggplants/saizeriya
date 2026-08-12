@@ -2,24 +2,32 @@
 
 import argparse
 import contextlib
-import json
 import logging
-import os
 import shlex
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, NoReturn
+from typing import TYPE_CHECKING, Any, NoReturn
 
 from _colorize import can_colorize, get_theme  # ty: ignore[unresolved-import]
 
 
 import httpx
 
-from . import fetch_menu
+from . import fetch_menu, tui
 from .client import SaizeriyaClient
-from .types import AccountSummary, CartItem, ClientState
+from .sessions import (
+    make_http,
+    read_sessions,
+    remove_session,
+    save_session,
+    state_from_dict,
+)
+from .types import AccountSummary, ClientState
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 logger = logging.getLogger(__name__)
 
@@ -41,106 +49,8 @@ class _ReplArgumentParser(argparse.ArgumentParser):
         raise _ReplParseError(detail)
 
 
-def _cli_home() -> Path:
-    raw = os.environ.get("SAIZERIYA_CLI_HOME")
-    if raw:
-        return Path(raw)
-    return Path.home() / ".saizeriya-cli"
-
-
-def _sessions_path() -> Path:
-    return _cli_home() / "sessions.json"
-
-
-def _read_sessions() -> dict[str, dict[str, Any]]:
-    path = _sessions_path()
-    if not path.exists():
-        return {}
-    return json.loads(path.read_text(encoding="utf-8"))
-
-
-def _write_sessions(sessions: dict[str, dict[str, Any]]) -> None:
-    path = _sessions_path()
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        json.dumps(sessions, indent=2, ensure_ascii=False) + "\n",
-        encoding="utf-8",
-    )
-
-
-def _cart_item_to_dict(item: CartItem) -> dict[str, Any]:
-    return {
-        "id": item.id,
-        "name": item.name,
-        "price": item.price,
-        "count": item.count,
-        "reorder": item.reorder,
-        "modId": item.mod_id,
-        "modCount": item.mod_count,
-    }
-
-
-def _state_to_dict(state: ClientState) -> dict[str, Any]:
-    return {
-        "baseURL": state.base_url,
-        "nextId": state.next_id,
-        "shopId": state.shop_id,
-        "tableNo": state.table_no,
-        "peopleCount": state.people_count,
-        "token": state.token,
-        "sessionId": state.session_id,
-        "pageKind": state.page_kind,
-        "cart": [_cart_item_to_dict(item) for item in state.cart],
-    }
-
-
-def _state_from_dict(data: dict[str, Any]) -> ClientState:
-    return ClientState(
-        base_url=data["baseURL"],
-        next_id=data["nextId"],
-        shop_id=data["shopId"],
-        table_no=data["tableNo"],
-        people_count=data["peopleCount"],
-        token=data.get("token"),
-        session_id=data.get("sessionId"),
-        page_kind=data["pageKind"],
-        cart=[
-            CartItem(
-                id=c["id"],
-                name=c.get("name"),
-                price=c.get("price"),
-                count=c["count"],
-                reorder=c["reorder"],
-                mod_id=c.get("modId", ""),
-                mod_count=c.get("modCount", 0) or 0,
-            )
-            for c in data.get("cart", [])
-        ],
-    )
-
-
-def _cookies_to_pairs(http: httpx.Client) -> list[list[str]]:
-    return [[cookie.name, cookie.value or ""] for cookie in http.cookies.jar]
-
-
 def _save_session(name: str, http: httpx.Client, client: SaizeriyaClient, created_at: int) -> None:
-    sessions = _read_sessions()
-    sessions[name] = {
-        "name": name,
-        "state": _state_to_dict(client.get_state()),
-        "cookies": _cookies_to_pairs(http),
-        "createdAt": created_at,
-        "updatedAt": int(time.time() * 1000),
-    }
-    _write_sessions(sessions)
-
-
-def _make_http(cookies: list[Any] | None = None) -> httpx.Client:
-    http = httpx.Client(follow_redirects=True)
-    for entry in cookies or []:
-        if isinstance(entry, (list, tuple)) and len(entry) >= 2:  # noqa: PLR2004
-            http.cookies.set(str(entry[0]), str(entry[1]))
-    return http
+    save_session(name, http, client.get_state(), created_at)
 
 
 def _print_state(state: ClientState) -> None:
@@ -358,7 +268,7 @@ def _run_repl(name: str, client: SaizeriyaClient, http: httpx.Client, created_at
 
 
 def _cmd_start(ns: argparse.Namespace) -> None:
-    http = _make_http()
+    http = make_http()
     try:
         client = SaizeriyaClient(
             qr_url_source=ns.qr_url,
@@ -380,15 +290,15 @@ def _cmd_start(ns: argparse.Namespace) -> None:
 
 
 def _cmd_use(ns: argparse.Namespace) -> None:
-    sessions = _read_sessions()
+    sessions = read_sessions()
     snapshot = sessions.get(ns.name)
     if not snapshot:
         msg = f"Session not found: {ns.name}"
         raise ValueError(msg)
 
-    http = _make_http(snapshot.get("cookies", []))
+    http = make_http(snapshot.get("cookies", []))
     try:
-        state = _state_from_dict(snapshot["state"])
+        state = state_from_dict(snapshot["state"])
         client = SaizeriyaClient(initial_state=state, http=http)
         _print_state(client.get_state())
         _run_repl(
@@ -403,11 +313,11 @@ def _cmd_use(ns: argparse.Namespace) -> None:
 
 
 def _cmd_list() -> None:
-    sessions = _read_sessions()
+    sessions = read_sessions()
     for snapshot in sessions.values():
         updated = datetime.fromtimestamp(
             snapshot["updatedAt"] / 1000,
-            tz=timezone.utc,
+            tz=UTC,
         ).isoformat()
         logger.info(
             "%s\t%s\ttable=%s",
@@ -418,10 +328,18 @@ def _cmd_list() -> None:
 
 
 def _cmd_rm(ns: argparse.Namespace) -> None:
-    sessions = _read_sessions()
-    sessions.pop(ns.name, None)
-    _write_sessions(sessions)
+    remove_session(ns.name)
     logger.info("Removed %s", ns.name)
+
+
+def _cmd_tui(ns: argparse.Namespace) -> None:
+    try:
+        if ns.serve:
+            tui.serve(host=ns.host, port=ns.port, session_name=ns.name)
+        else:
+            tui.run(session_name=ns.name)
+    except ImportError as exc:
+        raise SystemExit(tui.MISSING_EXTRA_MESSAGE) from exc
 
 
 def _cmd_fetch_menu(ns: argparse.Namespace) -> None:
@@ -458,6 +376,16 @@ def _build_top_parser() -> argparse.ArgumentParser:
 
     p_rm = sub.add_parser("rm", help="Remove a saved session")
     p_rm.add_argument("name", help="Session name")
+
+    p_tui = sub.add_parser("tui", help="Launch the Textual TUI (requires the 'tui' extra)")
+    p_tui.add_argument("name", nargs="?", default=None, help="Saved session to resume on start-up")
+    p_tui.add_argument("--serve", action="store_true", help="Serve the TUI over HTTP via textual-serve")
+    p_tui.add_argument(
+        "--host", default=tui.DEFAULT_SERVE_HOST, help="Host to bind when serving (default: %(default)s)"
+    )
+    p_tui.add_argument(
+        "--port", type=int, default=tui.DEFAULT_SERVE_PORT, help="Port to bind when serving (default: %(default)s)"
+    )
 
     p_fetch = sub.add_parser("fetch-menu", help="Crawl menu data for shops")
     p_fetch.add_argument(
@@ -519,17 +447,21 @@ def main(argv: list[str] | None = None) -> None:
         parser.print_help()
         return
 
+    commands: dict[str, Callable[[argparse.Namespace], None]] = {
+        "start": _cmd_start,
+        "use": _cmd_use,
+        "list": lambda _ns: _cmd_list(),
+        "rm": _cmd_rm,
+        "tui": _cmd_tui,
+        "fetch-menu": _cmd_fetch_menu,
+    }
+    command = commands.get(ns.command)
+    if command is None:
+        parser.print_help()
+        return
+
     try:
-        if ns.command == "start":
-            _cmd_start(ns)
-        elif ns.command == "use":
-            _cmd_use(ns)
-        elif ns.command == "list":
-            _cmd_list()
-        elif ns.command == "rm":
-            _cmd_rm(ns)
-        elif ns.command == "fetch-menu":
-            _cmd_fetch_menu(ns)
+        command(ns)
     except Exception:
         logger.exception("Error while executing command: %s", ns.command)
         sys.exit(1)

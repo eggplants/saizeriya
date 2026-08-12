@@ -1,0 +1,157 @@
+Screen {
+    background: $surface;
+}
+
+#start-body {
+    padding: 1 2;
+    height: 1fr;
+}
+
+.section-title {
+    text-style: bold;
+    color: $accent;
+    margin: 1 0 0 0;
+}
+
+.hint {
+    color: $text-muted;
+}
+
+.toolbar {
+    height: auto;
+    align-vertical: middle;
+}
+
+.toolbar Button {
+    margin: 0 1 0 0;
+}
+
+.toolbar Input {
+    margin: 0 1 0 0;
+}
+
+#session-table,
+#menu-table,
+#cart-table,
+#account-table {
+    height: 1fr;
+}
+
+#menu-search {
+    width: 1fr;
+}
+
+#menu-category {
+    width: 24;
+}
+
+#manual-code {
+    width: 12;
+}
+
+#gacha-budget {
+    width: 14;
+}
+
+.pane {
+    padding: 1 2;
+    height: 1fr;
+}
+
+.footer-bar {
+    height: auto;
+    padding: 1 0 0 0;
+    border-top: solid $panel-lighten-2;
+    align-vertical: middle;
+}
+
+.total {
+    text-style: bold;
+    width: 1fr;
+    height: 3;
+    padding: 1 2 0 0;
+    content-align: right middle;
+}
+
+.call-pane {
+    align: center middle;
+}
+
+.call-pane Button {
+    width: 44;
+    margin: 1 0;
+}
+
+#barcode-value {
+    text-style: bold;
+    text-align: center;
+    color: $success;
+    padding: 1 0;
+}
+
+QRFilePickerScreen > Vertical,
+PeopleScreen > Vertical,
+ConfirmScreen > Vertical,
+GachaScreen > Vertical,
+TextPromptScreen > Vertical {
+    background: $panel;
+    border: thick $accent;
+    padding: 1 2;
+}
+
+QRFilePickerScreen > Vertical {
+    width: 84;
+    height: 30;
+}
+
+#qr-tree {
+    height: 1fr;
+    margin: 1 0;
+}
+
+PeopleScreen > Vertical {
+    width: 60;
+    height: auto;
+}
+
+#people-grid {
+    grid-size: 4 2;
+    grid-gutter: 1;
+    height: 7;
+    margin: 1 0;
+}
+
+ConfirmScreen > Vertical,
+TextPromptScreen > Vertical {
+    width: 72;
+    height: auto;
+}
+
+GachaScreen > Vertical {
+    width: 76;
+    height: 32;
+}
+
+#gacha-results {
+    height: 1fr;
+    margin: 1 0;
+}
+
+.dialog-title {
+    text-style: bold;
+    color: $accent;
+}
+
+.dialog-buttons {
+    height: auto;
+    align-horizontal: right;
+    padding: 1 0 0 0;
+}
+
+.dialog-buttons Button {
+    margin: 0 0 0 1;
+}
+
+.error {
+    color: $error;
+}

@@ -273,22 +273,29 @@ saizeriya    </h1>
 <h2 id="installation">Installation</h2>
 
 <div class="pdoc-code codehilite">
-<pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>saizeriya
-<span class="c1"># or, (CLI only)</span>
-pipx<span class="w"> </span>install<span class="w"> </span>saizeriya
+<pre><span></span><code><span class="c1"># from mise</span>
+mise<span class="w"> </span>use<span class="w"> </span>pipx:saizeriya<span class="w">               </span><span class="c1"># CLI only</span>
+mise<span class="w"> </span>use<span class="w"> </span><span class="s1">&#39;pipx:saizeriya[extras=tui]&#39;</span><span class="w"> </span><span class="c1"># CLI+TUI</span>
+
+<span class="c1"># from pipx</span>
+pipx<span class="w"> </span>install<span class="w"> </span>saizeriya<span class="w">        </span><span class="c1"># CLI only</span>
+pipx<span class="w"> </span>install<span class="w"> </span><span class="s1">&#39;saizeriya[tui]&#39;</span><span class="w"> </span><span class="c1"># CLI+TUI</span>
+
+<span class="c1"># from pip</span>
+pip<span class="w"> </span>install<span class="w"> </span>saizeriya<span class="w">        </span><span class="c1"># CLI only</span>
+pip<span class="w"> </span>install<span class="w"> </span><span class="s1">&#39;saizeriya[tui]&#39;</span><span class="w"> </span><span class="c1"># CLI+TUI</span>
 </code></pre>
 </div>
 
 <h2 id="usage">Usage</h2>
 
-<h3 id="docker">Docker</h3>
-
-<pre><code>docker run --rm -it ghcr.io/eggplants/saizeriya
-</code></pre>
-
 <h3 id="cli">CLI</h3>
 
-<pre><code>$ saizeriya
+<p><details></p>
+
+<p><summary><code>saizeriya --help</code></summary></p>
+
+<pre><code>$ saizeriya --help
 usage: saizeriya [-h] &lt;command&gt; ...
 
 Saizeriya order CLI.
@@ -299,6 +306,7 @@ positional arguments:
     use         Resume a saved session
     list        List saved sessions
     rm          Remove a saved session
+    tui         Launch the Textual TUI (requires the 'tui' extra)
     fetch-menu  Crawl menu data for shops
 
 options:
@@ -351,6 +359,24 @@ available commands in start/use REPL:
 <pre><span></span><code>saizeriya<span class="w"> </span>start<span class="w"> </span>lunch<span class="w"> </span><span class="s2">&quot;https://ioes03.saizeriya.co.jp/saizeriya3/?...&quot;</span>
 </code></pre>
 </div>
+
+<p></details></p>
+
+<h3 id="tui">TUI</h3>
+
+<div class="pdoc-code codehilite">
+<pre><span></span><code><span class="c1"># on the terminal</span>
+saizeriya<span class="w"> </span>tui
+
+<span class="c1"># on the web</span>
+saizeriya<span class="w"> </span>tui<span class="w"> </span>--serve
+</code></pre>
+</div>
+
+<h3 id="docker">Docker</h3>
+
+<pre><code>docker run --rm -it ghcr.io/eggplants/saizeriya
+</code></pre>
 
 <h3 id="library">Library</h3>
 
@@ -2023,7 +2049,7 @@ saizeriya-mock-server
                 <section id="__version__">
                     <div class="attr variable">
             <span class="name">__version__</span>        =
-<span class="default_value">&#39;0.0.0.post1+5aaf46c&#39;</span>
+<span class="default_value">&#39;0.0.0.post1+b105787&#39;</span>
 
         
     </div>

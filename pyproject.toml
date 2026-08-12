@@ -47,9 +47,9 @@ mock = [
 ]
 
 [tool.hatch]
-build.targets.sdist.include = [ "saizeriya" ]
-build.targets.wheel.include = [ "saizeriya" ]
 version.source = "uv-dynamic-versioning"
+build.targets.wheel.include = [ "saizeriya" ]
+build.targets.sdist.include = [ "saizeriya" ]
 
 [tool.uv]
 python-downloads = "never"

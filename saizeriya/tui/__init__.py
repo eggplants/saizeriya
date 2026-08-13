@@ -16,6 +16,20 @@ logger = logging.getLogger(__name__)
 
 MISSING_EXTRA_MESSAGE = "TUI を使うには 'tui' エクストラが必要です: pipx install 'saizeriya[tui]'"
 
+
+def missing_dependency_message(name: str | None = None) -> str:
+    """Explain how to get hold of a TUI dependency that could not be imported.
+
+    The standalone binaries bundle their own dependencies, so pointing their
+    users at an extra is wrong: only the Android build ships without part of the
+    `tui` extra (zxing-cpp and Pillow need a native build), and no pipx install
+    changes what is already frozen into the executable.
+    """
+    if getattr(sys, "frozen", False):
+        return f"この実行ファイルには {name or 'TUI の依存関係'} が含まれていません"
+    return MISSING_EXTRA_MESSAGE
+
+
 DEFAULT_SERVE_HOST = "localhost"
 DEFAULT_SERVE_PORT = 8000
 
@@ -68,6 +82,7 @@ __all__ = [
     "DEFAULT_SERVE_PORT",
     "MISSING_EXTRA_MESSAGE",
     "main",
+    "missing_dependency_message",
     "run",
     "serve",
     "serve_command",

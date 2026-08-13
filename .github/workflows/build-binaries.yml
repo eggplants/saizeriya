@@ -60,6 +60,11 @@ jobs:
             -v "${PWD}:/repo:ro" -v "${PWD}/dist:/out" -w /repo \
             -e PYINSTALLER_COMPILE_BOOTLOADER=1 \
             -e PYTHONDONTWRITEBYTECODE=1 \
+            -e AIOHTTP_NO_EXTENSIONS=1 \
+            -e FROZENLIST_NO_EXTENSIONS=1 \
+            -e MULTIDICT_NO_EXTENSIONS=1 \
+            -e PROPCACHE_NO_EXTENSIONS=1 \
+            -e YARL_NO_EXTENSIONS=1 \
             termux/termux-docker:aarch64 bash -eux -c "
               apt update
               apt install -yq python clang binutils libxml2 libxslt pkg-config
@@ -68,9 +73,14 @@ jobs:
                 printf '#!%s/bin/sh\nexit 0\n' \"\$PREFIX\" > \"\$PREFIX/bin/ldd\"
                 chmod +x \"\$PREFIX/bin/ldd\"
               }
-              pip install --no-cache-dir beautifulsoup4 httpx lxml pyinstaller
-              pyinstaller --clean --onefile --name saizeriya --distpath /out --workpath \$PREFIX/tmp/build --specpath \$PREFIX/tmp/build --paths /repo --add-data /repo/saizeriya/data/menu.json:saizeriya/data --hidden-import lxml._elementpath /repo/packaging/entrypoint.py
+              pip install --no-cache-dir beautifulsoup4 httpx lxml textual pyinstaller
+              pip install --no-cache-dir textual-serve || echo 'WARNING: textual-serve unavailable, tui --serve will not work'
+              pyinstaller --clean --noconfirm --distpath /out --workpath \$PREFIX/tmp/build /repo/packaging/saizeriya.spec
               /out/saizeriya help
+              status=0
+              TEXTUAL_DRIVER=textual.drivers.headless_driver:HeadlessDriver \
+                timeout 180 /out/saizeriya tui </dev/null >\$PREFIX/tmp/tui.log 2>&1 || status=\$?
+              [ \"\$status\" = 124 ] || { echo \"saizeriya tui exited with \$status\"; tail -30 \$PREFIX/tmp/tui.log; exit 1; }
             "
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:

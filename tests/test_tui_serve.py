@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from saizeriya.tui import serve_command
+from saizeriya.tui import MISSING_EXTRA_MESSAGE, missing_dependency_message, serve_command
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -32,6 +32,21 @@ def test_serve_command_calls_the_cli_when_frozen(monkeypatch: pytest.MonkeyPatch
     monkeypatch.setattr(sys, "executable", "/opt/saizeriya")
 
     assert serve_command("mysession") == "/opt/saizeriya tui mysession"
+
+
+def test_missing_dependency_message_points_at_the_extra_when_not_frozen(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delattr(sys, "frozen", raising=False)
+
+    assert missing_dependency_message("textual") == MISSING_EXTRA_MESSAGE
+
+
+def test_missing_dependency_message_names_the_module_when_frozen(monkeypatch: pytest.MonkeyPatch) -> None:
+    # The Android binary ships without zxing-cpp/Pillow, and no `pipx install`
+    # can add anything to an already frozen executable.
+    monkeypatch.setattr(sys, "frozen", True, raising=False)
+
+    assert "zxingcpp" in missing_dependency_message("zxingcpp")
+    assert "pipx" not in missing_dependency_message(None)
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="POSIX quoting")

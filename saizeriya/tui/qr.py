@@ -8,6 +8,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from saizeriya.tui import missing_dependency_message
+
 if TYPE_CHECKING:
     from pathlib import Path
 
@@ -33,7 +35,7 @@ def decode_qr_texts(path: Path) -> list[str]:
         import zxingcpp  # noqa: PLC0415
         from PIL import Image, UnidentifiedImageError  # noqa: PLC0415
     except ImportError as exc:  # pragma: no cover - depends on install extras
-        msg = "QR reading requires the 'tui' extra: pipx install 'saizeriya[tui]'"
+        msg = f"{missing_dependency_message(exc.name)}。URL を直接入力してください"
         raise QRDecodeError(msg) from exc
 
     try:

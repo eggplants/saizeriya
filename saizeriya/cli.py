@@ -339,7 +339,7 @@ def _cmd_tui(ns: argparse.Namespace) -> None:
         else:
             tui.run(session_name=ns.name)
     except ImportError as exc:
-        raise SystemExit(tui.MISSING_EXTRA_MESSAGE) from exc
+        raise SystemExit(tui.missing_dependency_message(exc.name)) from exc
 
 
 def _cmd_fetch_menu(ns: argparse.Namespace) -> None:

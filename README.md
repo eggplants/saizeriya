@@ -31,6 +31,9 @@ Unofficial [Saizeriya](https://www.saizeriya.co.jp/) Client, inspired by [saizer
 mise use pipx:saizeriya               # CLI only
 mise use 'pipx:saizeriya[extras=tui]' # CLI+TUI
 
+# pre-built CLI+TUI, >=v0.3.0
+mise use github:eggplants/saizeriya@<version>
+
 # from pipx
 pipx install saizeriya        # CLI only
 pipx install 'saizeriya[tui]' # CLI+TUI

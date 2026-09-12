@@ -1,19 +1,17 @@
 """Interactive CLI for `saizeriya`."""
 
+from __future__ import annotations
+
 import argparse
 import contextlib
 import logging
 import shlex
 import sys
 import time
+from _colorize import can_colorize, get_theme  # ty: ignore[unresolved-import]
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, NoReturn
-
-from _colorize import can_colorize, get_theme  # ty: ignore[unresolved-import]
-
-
-import httpx
 
 from . import fetch_menu, tui
 from .client import SaizeriyaClient
@@ -24,10 +22,13 @@ from .sessions import (
     save_session,
     state_from_dict,
 )
-from .types import AccountSummary, ClientState
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+
+    import httpx
+
+    from .types import AccountSummary, ClientState
 
 logger = logging.getLogger(__name__)
 

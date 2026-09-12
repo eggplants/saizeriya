@@ -156,9 +156,11 @@ def test_client_can_pause_at_top_without_people_count() -> None:
 def test_lookup_validates_code() -> None:
     transport, _ = make_handler()
     http = httpx.Client(transport=transport, follow_redirects=True)
-    with SaizeriyaClient(qr_url_source=QR_URL, people_count=2, http=http) as client:
-        with pytest.raises(ValueError, match="4 digits"):
-            client.lookup_item("12")
+    with (
+        SaizeriyaClient(qr_url_source=QR_URL, people_count=2, http=http) as client,
+        pytest.raises(ValueError, match="4 digits"),
+    ):
+        client.lookup_item("12")
 
 
 def test_add_item_appends_to_cart_and_remove_works() -> None:
@@ -179,6 +181,8 @@ def test_add_item_appends_to_cart_and_remove_works() -> None:
 def test_submit_order_requires_non_empty_cart() -> None:
     transport, _ = make_handler()
     http = httpx.Client(transport=transport, follow_redirects=True)
-    with SaizeriyaClient(qr_url_source=QR_URL, people_count=2, http=http) as client:
-        with pytest.raises(ValueError, match="empty cart"):
-            client.submit_order()
+    with (
+        SaizeriyaClient(qr_url_source=QR_URL, people_count=2, http=http) as client,
+        pytest.raises(ValueError, match="empty cart"),
+    ):
+        client.submit_order()

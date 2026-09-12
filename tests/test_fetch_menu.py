@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
+from typing import TYPE_CHECKING
 from urllib.parse import parse_qsl
 
 import httpx
 
 from saizeriya import fetch_menu
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def _item_payload(item_id: str, name: str = "Dish", price: int = 100) -> dict:

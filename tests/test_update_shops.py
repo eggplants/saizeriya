@@ -3,13 +3,15 @@ from __future__ import annotations
 import logging
 import sys
 from pathlib import Path
-
-import pytest
+from typing import TYPE_CHECKING
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from scripts.update_shops import deduplicate, parse_page, render_module  # noqa: E402
+
+if TYPE_CHECKING:
+    import pytest
 
 SAMPLE_HTML = """
 <html><body>

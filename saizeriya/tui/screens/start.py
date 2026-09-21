@@ -6,7 +6,7 @@ import asyncio
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, ClassVar, cast
 
-import httpx
+import httpx2
 from textual import work
 from textual.containers import Horizontal, Vertical
 from textual.screen import Screen
@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 
     from saizeriya.tui.app import SaizeriyaApp
 
-SESSION_ERRORS = (httpx.HTTPError, QRDecodeError, ValueError, TypeError, KeyError, OSError)
+SESSION_ERRORS = (httpx2.HTTPError, QRDecodeError, ValueError, TypeError, KeyError, OSError)
 
 
 class StartScreen(Screen[None]):

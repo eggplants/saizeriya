@@ -6,7 +6,7 @@ import asyncio
 import re
 from typing import TYPE_CHECKING, ClassVar, Literal, cast
 
-import httpx
+import httpx2
 from textual import work
 from textual.containers import Horizontal, Vertical
 from textual.screen import Screen
@@ -51,7 +51,7 @@ STATUS_LABELS: dict[MenuStatus, str] = {
     "error": "確認失敗",
 }
 
-ORDER_ERRORS = (httpx.HTTPError, ValueError, TypeError, KeyError)
+ORDER_ERRORS = (httpx2.HTTPError, ValueError, TypeError, KeyError)
 
 STATUS_COLUMN = "status"
 

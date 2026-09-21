@@ -10,7 +10,7 @@ import random
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-import httpx
+import httpx2
 
 from .shops import SHOPS
 
@@ -42,7 +42,7 @@ def fetch_item(  # noqa: PLR0913
     shop_id: str,
     item_code: int,
     *,
-    http: httpx.Client,
+    http: httpx2.Client,
     table_no: str = DEFAULT_TABLE_NO,
     language: str = DEFAULT_LANGUAGE,
     people_count: str = DEFAULT_PEOPLE_COUNT,
@@ -96,7 +96,7 @@ def crawl(  # noqa: PLR0913
     language: str = DEFAULT_LANGUAGE,
     people_count: str = DEFAULT_PEOPLE_COUNT,
     shuffle: bool = True,
-    http: httpx.Client | None = None,
+    http: httpx2.Client | None = None,
 ) -> ResultMap:
     """Crawl `shops` * `item_code_count`, persisting incrementally to `out`.
 
@@ -110,7 +110,7 @@ def crawl(  # noqa: PLR0913
         random.shuffle(shop_list)
 
     own_http = http is None
-    client = http if http is not None else httpx.Client()
+    client = http if http is not None else httpx2.Client()
 
     total = len(shop_list) * item_code_count
     skipped = 0
@@ -134,7 +134,7 @@ def crawl(  # noqa: PLR0913
                         language=language,
                         people_count=people_count,
                     )
-                except httpx.HTTPError as exc:
+                except httpx2.HTTPError as exc:
                     logger.warning("Failed to fetch %s/%s: %s", shop_id, item_id, exc)
                     continue
                 logger.info("Fetched %s/%s", shop_id, item_id)

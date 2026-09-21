@@ -73,7 +73,7 @@ jobs:
                 printf '#!%s/bin/sh\nexit 0\n' \"\$PREFIX\" > \"\$PREFIX/bin/ldd\"
                 chmod +x \"\$PREFIX/bin/ldd\"
               }
-              pip install --no-cache-dir beautifulsoup4 httpx lxml textual pyinstaller
+              pip install --no-cache-dir beautifulsoup4 httpx2 lxml textual pyinstaller
               pip install --no-cache-dir textual-serve || echo 'WARNING: textual-serve unavailable, tui --serve will not work'
               pyinstaller --clean --noconfirm --distpath /out --workpath \$PREFIX/tmp/build /repo/packaging/saizeriya.spec
               /out/saizeriya help

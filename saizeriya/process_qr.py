@@ -7,7 +7,7 @@ from urllib.parse import urljoin, urlparse
 from .page_parser import PageParser
 
 if TYPE_CHECKING:
-    import httpx
+    import httpx2
 
     from .types import PageKind
 
@@ -24,7 +24,7 @@ class ProcessedQR:
     page_kind: PageKind
 
 
-def process_qr(qr_url: str, http: httpx.Client) -> ProcessedQR:
+def process_qr(qr_url: str, http: httpx2.Client) -> ProcessedQR:
     """Fetch the QR redirect target and parse it into a `ProcessedQR`."""
     qr_response = http.get(qr_url, follow_redirects=False)
     location = qr_response.headers.get("location")

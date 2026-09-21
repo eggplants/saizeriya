@@ -26,7 +26,7 @@ from .sessions import (
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    import httpx
+    import httpx2
 
     from .types import AccountSummary, ClientState
 
@@ -50,7 +50,7 @@ class _ReplArgumentParser(argparse.ArgumentParser):
         raise _ReplParseError(detail)
 
 
-def _save_session(name: str, http: httpx.Client, client: SaizeriyaClient, created_at: int) -> None:
+def _save_session(name: str, http: httpx2.Client, client: SaizeriyaClient, created_at: int) -> None:
     save_session(name, http, client.get_state(), created_at)
 
 
@@ -245,7 +245,7 @@ def _run_command(client: SaizeriyaClient, args: list[str]) -> str:  # noqa: C901
     return "continue"
 
 
-def _run_repl(name: str, client: SaizeriyaClient, http: httpx.Client, created_at: int) -> None:
+def _run_repl(name: str, client: SaizeriyaClient, http: httpx2.Client, created_at: int) -> None:
     logger.info('Session "%s" is ready. Type help for commands.', name)
     prompt = f"saizeriya:{name}> "
     while True:

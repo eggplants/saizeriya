@@ -5,7 +5,7 @@ import re
 from typing import TYPE_CHECKING, Any
 from urllib.parse import urljoin
 
-import httpx
+import httpx2
 
 from .forms import (
     FORM_CONTENT_TYPE,
@@ -39,10 +39,10 @@ class SaizeriyaClient:
         *,
         people_count: int | None = None,
         initial_state: ClientState | None = None,
-        http: httpx.Client | None = None,
+        http: httpx2.Client | None = None,
     ) -> None:
         """Initialize the client with either a QR URL or a previous state snapshot."""
-        self._http = http if http is not None else httpx.Client(follow_redirects=True)
+        self._http = http if http is not None else httpx2.Client(follow_redirects=True)
         self._owns_http = http is None
 
         if initial_state is not None:

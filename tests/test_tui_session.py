@@ -4,7 +4,7 @@ import json
 from typing import TYPE_CHECKING
 from urllib.parse import parse_qsl
 
-import httpx
+import httpx2
 import pytest
 
 from saizeriya.menu import MenuItem
@@ -84,10 +84,10 @@ RECEIPT_PAGE = """
 """
 
 
-def _item_response(code: str) -> httpx.Response:
+def _item_response(code: str) -> httpx2.Response:
     if code == MISSING_CODE:
-        return httpx.Response(200, json={"result": "NG"})
-    return httpx.Response(
+        return httpx2.Response(200, json={"result": "NG"})
+    return httpx2.Response(
         200,
         json={
             "result": "OK",
@@ -110,38 +110,38 @@ PAGE_BY_PROC = {
 }
 
 
-def make_transport() -> tuple[httpx.MockTransport, list[httpx.Request]]:
-    seen: list[httpx.Request] = []
+def make_transport() -> tuple[httpx2.MockTransport, list[httpx2.Request]]:
+    seen: list[httpx2.Request] = []
 
-    def handler(request: httpx.Request) -> httpx.Response:
+    def handler(request: httpx2.Request) -> httpx2.Response:
         seen.append(request)
         url = str(request.url)
         body = dict(parse_qsl(request.content.decode("utf-8"))) if request.content else {}
 
         if url == QR_URL:
-            return httpx.Response(302, headers={"location": LANDING_URL})
+            return httpx2.Response(302, headers={"location": LANDING_URL})
         if url == LANDING_URL and request.method == "GET":
-            return httpx.Response(200, text=TOP_PAGE)
+            return httpx2.Response(200, text=TOP_PAGE)
         if url.startswith(LANDING_URL + "?"):
-            return httpx.Response(200, text=PAGE_BY_PROC.get(body.get("proc", ""), MENU_PAGE))
+            return httpx2.Response(200, text=PAGE_BY_PROC.get(body.get("proc", ""), MENU_PAGE))
         if url.endswith("/src/cmd/get_item.php"):
             return _item_response(body.get("id", ""))
         if url.endswith("/src/cmd/tbl_call.php"):
-            return httpx.Response(200, json={"result": "OK"})
+            return httpx2.Response(200, json={"result": "OK"})
 
-        return httpx.Response(404, text=f"unhandled: {request.method} {url}")
+        return httpx2.Response(404, text=f"unhandled: {request.method} {url}")
 
-    return httpx.MockTransport(handler), seen
+    return httpx2.MockTransport(handler), seen
 
 
 @pytest.fixture
-def mock_http(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> list[httpx.Request]:
+def mock_http(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> list[httpx2.Request]:
     monkeypatch.setenv("SAIZERIYA_CLI_HOME", str(tmp_path))
     transport, seen = make_transport()
 
-    def fake_make_http(cookies: list | None = None) -> httpx.Client:
+    def fake_make_http(cookies: list | None = None) -> httpx2.Client:
         del cookies
-        return httpx.Client(transport=transport, follow_redirects=True)
+        return httpx2.Client(transport=transport, follow_redirects=True)
 
     monkeypatch.setattr(session_module, "make_http", fake_make_http)
     return seen
@@ -151,7 +151,7 @@ def menu_item(code: str, price: int = 350) -> MenuItem:
     return MenuItem(code=code, name=f"Dish{code}", kana=f"Dish{code}", price=price, category="サラダ")
 
 
-def test_start_reads_the_table_and_saves_a_snapshot(mock_http: list[httpx.Request], tmp_path: Path) -> None:
+def test_start_reads_the_table_and_saves_a_snapshot(mock_http: list[httpx2.Request], tmp_path: Path) -> None:
     del mock_http
     session = OrderSession.start("t1", QR_URL)
     try:
@@ -162,7 +162,7 @@ def test_start_reads_the_table_and_saves_a_snapshot(mock_http: list[httpx.Reques
         session.close()
 
 
-def test_lookup_returns_an_official_menu_item(mock_http: list[httpx.Request]) -> None:
+def test_lookup_returns_an_official_menu_item(mock_http: list[httpx2.Request]) -> None:
     del mock_http
     session = OrderSession.start("t1", QR_URL)
     try:
@@ -176,7 +176,7 @@ def test_lookup_returns_an_official_menu_item(mock_http: list[httpx.Request]) ->
         session.close()
 
 
-def test_lookup_rejects_sold_out_and_unknown_items(mock_http: list[httpx.Request]) -> None:
+def test_lookup_rejects_sold_out_and_unknown_items(mock_http: list[httpx2.Request]) -> None:
     del mock_http
     session = OrderSession.start("t1", QR_URL)
     try:
@@ -188,7 +188,7 @@ def test_lookup_rejects_sold_out_and_unknown_items(mock_http: list[httpx.Request
         session.close()
 
 
-def test_cart_merges_by_code_and_enforces_the_limit(mock_http: list[httpx.Request]) -> None:
+def test_cart_merges_by_code_and_enforces_the_limit(mock_http: list[httpx2.Request]) -> None:
     del mock_http
     session = OrderSession.start("t1", QR_URL)
     try:
@@ -210,7 +210,7 @@ def test_cart_merges_by_code_and_enforces_the_limit(mock_http: list[httpx.Reques
         session.close()
 
 
-def test_submit_pushes_the_cart_and_clears_it(mock_http: list[httpx.Request]) -> None:
+def test_submit_pushes_the_cart_and_clears_it(mock_http: list[httpx2.Request]) -> None:
     seen = mock_http
     session = OrderSession.start("t1", QR_URL, people_count=2)
     try:
@@ -229,7 +229,7 @@ def test_submit_pushes_the_cart_and_clears_it(mock_http: list[httpx.Request]) ->
         session.close()
 
 
-def test_submit_drops_items_the_server_no_longer_serves(mock_http: list[httpx.Request]) -> None:
+def test_submit_drops_items_the_server_no_longer_serves(mock_http: list[httpx2.Request]) -> None:
     del mock_http
     session = OrderSession.start("t1", QR_URL, people_count=2)
     try:
@@ -248,7 +248,7 @@ def test_submit_drops_items_the_server_no_longer_serves(mock_http: list[httpx.Re
         session.close()
 
 
-def test_submit_rejects_an_empty_cart(mock_http: list[httpx.Request]) -> None:
+def test_submit_rejects_an_empty_cart(mock_http: list[httpx2.Request]) -> None:
     del mock_http
     session = OrderSession.start("t1", QR_URL)
     try:
@@ -258,7 +258,7 @@ def test_submit_rejects_an_empty_cart(mock_http: list[httpx.Request]) -> None:
         session.close()
 
 
-def test_account_and_receipt_are_parsed(mock_http: list[httpx.Request]) -> None:
+def test_account_and_receipt_are_parsed(mock_http: list[httpx2.Request]) -> None:
     del mock_http
     session = OrderSession.start("t1", QR_URL)
     try:
@@ -273,7 +273,7 @@ def test_account_and_receipt_are_parsed(mock_http: list[httpx.Request]) -> None:
         session.close()
 
 
-def test_resume_restores_the_pending_cart_without_replaying_it(mock_http: list[httpx.Request]) -> None:
+def test_resume_restores_the_pending_cart_without_replaying_it(mock_http: list[httpx2.Request]) -> None:
     del mock_http
     session = OrderSession.start("t1", QR_URL)
     session.add_to_cart(menu_item("1202"), count=2)
@@ -288,13 +288,13 @@ def test_resume_restores_the_pending_cart_without_replaying_it(mock_http: list[h
         resumed.close()
 
 
-def test_resume_reports_unknown_sessions(mock_http: list[httpx.Request]) -> None:
+def test_resume_reports_unknown_sessions(mock_http: list[httpx2.Request]) -> None:
     del mock_http
     with pytest.raises(ValueError, match="セッションが見つかりません"):
         OrderSession.resume("nope")
 
 
-def test_call_staff_hits_the_call_endpoint(mock_http: list[httpx.Request]) -> None:
+def test_call_staff_hits_the_call_endpoint(mock_http: list[httpx2.Request]) -> None:
     seen = mock_http
     session = OrderSession.start("t1", QR_URL)
     try:

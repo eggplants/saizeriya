@@ -22,7 +22,7 @@ from saizeriya.sessions import (
 from saizeriya.types import CartItem
 
 if TYPE_CHECKING:
-    import httpx
+    import httpx2
 
     from saizeriya.types import AccountSummary, ClientState, ReceiptSummary
 
@@ -77,7 +77,7 @@ class OrderSession:
     def __init__(
         self,
         name: str,
-        http: httpx.Client,
+        http: httpx2.Client,
         client: SaizeriyaClient,
         created_at: int,
         cart: list[CartLine] | None = None,

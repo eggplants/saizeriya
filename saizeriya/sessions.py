@@ -13,7 +13,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-import httpx
+import httpx2
 
 from .types import CartItem, ClientState
 
@@ -103,21 +103,21 @@ def state_from_dict(data: dict[str, Any]) -> ClientState:
     )
 
 
-def cookies_to_pairs(http: httpx.Client) -> list[list[str]]:
+def cookies_to_pairs(http: httpx2.Client) -> list[list[str]]:
     """Flatten a cookie jar into serializable name/value pairs."""
     return [[cookie.name, cookie.value or ""] for cookie in http.cookies.jar]
 
 
-def make_http(cookies: list[Any] | None = None) -> httpx.Client:
+def make_http(cookies: list[Any] | None = None) -> httpx2.Client:
     """Build an HTTP client seeded with previously saved cookies."""
-    http = httpx.Client(follow_redirects=True)
+    http = httpx2.Client(follow_redirects=True)
     for entry in cookies or []:
         if isinstance(entry, (list, tuple)) and len(entry) >= 2:  # noqa: PLR2004
             http.cookies.set(str(entry[0]), str(entry[1]))
     return http
 
 
-def save_session(name: str, http: httpx.Client, state: ClientState, created_at: int) -> None:
+def save_session(name: str, http: httpx2.Client, state: ClientState, created_at: int) -> None:
     """Persist a session snapshot under `name`."""
     sessions = read_sessions()
     sessions[name] = {

@@ -35,7 +35,7 @@ classifiers = [
 dynamic = [ "version" ]
 dependencies = [
   "beautifulsoup4>=4.12",
-  "httpx>=0.28.1",
+  "httpx2>=2.13",
   "lxml>=5",
 ]
 optional-dependencies.tui = [

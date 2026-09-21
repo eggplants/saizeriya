@@ -10,7 +10,7 @@ import logging
 import re
 from pathlib import Path
 
-import httpx
+import httpx2
 from bs4 import BeautifulSoup, Tag
 
 logger = logging.getLogger(__name__)
@@ -50,7 +50,7 @@ def parse_page(html: str) -> list[tuple[str, str]]:
     return pairs
 
 
-def fetch_all(http: httpx.Client, *, limit: int = 500) -> list[tuple[str, str]]:
+def fetch_all(http: httpx2.Client, *, limit: int = 500) -> list[tuple[str, str]]:
     """Walk pages until a partial page (< limit results) is returned."""
     collected: list[tuple[str, str]] = []
     page = 1
@@ -126,7 +126,7 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     headers = {"user-agent": USER_AGENT, "accept-language": "ja"}
-    with httpx.Client(headers=headers, timeout=30.0, follow_redirects=True) as http:
+    with httpx2.Client(headers=headers, timeout=30.0, follow_redirects=True) as http:
         pairs = fetch_all(http, limit=args.limit)
 
     if not pairs:

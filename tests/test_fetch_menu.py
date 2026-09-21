@@ -4,7 +4,7 @@ import json
 from typing import TYPE_CHECKING
 from urllib.parse import parse_qsl
 
-import httpx
+import httpx2
 
 from saizeriya import fetch_menu
 
@@ -40,9 +40,9 @@ def _item_payload(item_id: str, name: str = "Dish", price: int = 100) -> dict:
 
 
 def test_fetch_item_posts_form_to_endpoint() -> None:
-    seen: list[httpx.Request] = []
+    seen: list[httpx2.Request] = []
 
-    def handler(request: httpx.Request) -> httpx.Response:
+    def handler(request: httpx2.Request) -> httpx2.Response:
         seen.append(request)
         assert str(request.url) == fetch_menu.FETCH_URL
         params = dict(parse_qsl(request.content.decode("utf-8")))
@@ -52,10 +52,10 @@ def test_fetch_item_posts_form_to_endpoint() -> None:
         assert params["num"] == fetch_menu.DEFAULT_PEOPLE_COUNT
         assert params["lng"] == fetch_menu.DEFAULT_LANGUAGE
         assert request.headers["x-requested-with"] == "XMLHttpRequest"
-        return httpx.Response(200, json=_item_payload("0007"))
+        return httpx2.Response(200, json=_item_payload("0007"))
 
-    transport = httpx.MockTransport(handler)
-    with httpx.Client(transport=transport) as http:
+    transport = httpx2.MockTransport(handler)
+    with httpx2.Client(transport=transport) as http:
         result = fetch_menu.fetch_item("42", 7, http=http)
     assert result["item_data"]["id"] == "0007"
     assert len(seen) == 1
@@ -64,15 +64,15 @@ def test_fetch_item_posts_form_to_endpoint() -> None:
 def test_crawl_writes_only_found_items_and_resumes(tmp_path: Path) -> None:
     out = tmp_path / "menu.json"
 
-    def handler(request: httpx.Request) -> httpx.Response:
+    def handler(request: httpx2.Request) -> httpx2.Response:
         params = dict(parse_qsl(request.content.decode("utf-8")))
         item_id = params["id"]
         if item_id == "0001":
-            return httpx.Response(200, json=_item_payload("0001"))
-        return httpx.Response(200, json={"result": "NG"})
+            return httpx2.Response(200, json=_item_payload("0001"))
+        return httpx2.Response(200, json={"result": "NG"})
 
-    transport = httpx.MockTransport(handler)
-    with httpx.Client(transport=transport) as http:
+    transport = httpx2.MockTransport(handler)
+    with httpx2.Client(transport=transport) as http:
         results = fetch_menu.crawl(
             shops=["42"],
             out=out,
@@ -89,13 +89,13 @@ def test_crawl_writes_only_found_items_and_resumes(tmp_path: Path) -> None:
 
     calls: list[str] = []
 
-    def second_handler(request: httpx.Request) -> httpx.Response:
+    def second_handler(request: httpx2.Request) -> httpx2.Response:
         params = dict(parse_qsl(request.content.decode("utf-8")))
         calls.append(params["id"])
-        return httpx.Response(200, json={"result": "NG"})
+        return httpx2.Response(200, json={"result": "NG"})
 
-    transport2 = httpx.MockTransport(second_handler)
-    with httpx.Client(transport=transport2) as http:
+    transport2 = httpx2.MockTransport(second_handler)
+    with httpx2.Client(transport=transport2) as http:
         fetch_menu.crawl(
             shops=["42"],
             out=out,

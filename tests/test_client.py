@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from urllib.parse import parse_qsl
 
-import httpx
+import httpx2
 import pytest
 
 from saizeriya import SaizeriyaClient
@@ -56,8 +56,8 @@ MAIN_PAGE = """
 """
 
 
-def _item_response(code: str) -> httpx.Response:
-    return httpx.Response(
+def _item_response(code: str) -> httpx2.Response:
+    return httpx2.Response(
         200,
         json={
             "result": "OK",
@@ -86,53 +86,53 @@ def _item_response(code: str) -> httpx.Response:
     )
 
 
-def make_handler() -> tuple[httpx.MockTransport, list[httpx.Request]]:
-    seen: list[httpx.Request] = []
+def make_handler() -> tuple[httpx2.MockTransport, list[httpx2.Request]]:
+    seen: list[httpx2.Request] = []
 
-    def handler(request: httpx.Request) -> httpx.Response:
+    def handler(request: httpx2.Request) -> httpx2.Response:
         seen.append(request)
         url = str(request.url)
 
         if url == QR_URL:
-            return httpx.Response(302, headers={"location": LANDING_URL})
+            return httpx2.Response(302, headers={"location": LANDING_URL})
         if url == LANDING_URL and request.method == "GET":
-            return httpx.Response(200, text=TOP_PAGE)
+            return httpx2.Response(200, text=TOP_PAGE)
 
         if url.startswith(LANDING_URL + "?"):
             params = dict(parse_qsl(request.content.decode("utf-8")))
             proc = params.get("proc")
             ctrl = params.get("ctrl", "")
             if proc == "number":
-                return httpx.Response(200, text=NUMBER_PAGE)
+                return httpx2.Response(200, text=NUMBER_PAGE)
             if proc == "menu" and ctrl == "number":
-                return httpx.Response(200, text=MENU_PAGE)
+                return httpx2.Response(200, text=MENU_PAGE)
             if proc == "main":
-                return httpx.Response(200, text=MAIN_PAGE)
-            return httpx.Response(200, text=MENU_PAGE)
+                return httpx2.Response(200, text=MAIN_PAGE)
+            return httpx2.Response(200, text=MENU_PAGE)
 
         if url.endswith("/src/cmd/tbl_call.php"):
-            return httpx.Response(200, json={"result": "OK"})
+            return httpx2.Response(200, json={"result": "OK"})
         if url.endswith("/src/cmd/get_item.php"):
             params = dict(parse_qsl(request.content.decode("utf-8")))
             return _item_response(params.get("id", ""))
 
-        return httpx.Response(404, text=f"unhandled: {request.method} {url}")
+        return httpx2.Response(404, text=f"unhandled: {request.method} {url}")
 
-    return httpx.MockTransport(handler), seen
+    return httpx2.MockTransport(handler), seen
 
 
-def _new_client(http: httpx.Client | None = None, *, people_count: int | None = 2) -> SaizeriyaClient:
+def _new_client(http: httpx2.Client | None = None, *, people_count: int | None = 2) -> SaizeriyaClient:
     transport, _ = make_handler()
     return SaizeriyaClient(
         qr_url_source=QR_URL,
         people_count=people_count,
-        http=http or httpx.Client(transport=transport, follow_redirects=True),
+        http=http or httpx2.Client(transport=transport, follow_redirects=True),
     )
 
 
 def test_client_initialises_from_qr_and_calls() -> None:
     transport, _ = make_handler()
-    http = httpx.Client(transport=transport, follow_redirects=True)
+    http = httpx2.Client(transport=transport, follow_redirects=True)
     with SaizeriyaClient(qr_url_source=QR_URL, people_count=2, http=http) as client:
         state = client.get_state()
         assert state.shop_id == 42
@@ -146,7 +146,7 @@ def test_client_initialises_from_qr_and_calls() -> None:
 
 def test_client_can_pause_at_top_without_people_count() -> None:
     transport, _ = make_handler()
-    http = httpx.Client(transport=transport, follow_redirects=True)
+    http = httpx2.Client(transport=transport, follow_redirects=True)
     with SaizeriyaClient(qr_url_source=QR_URL, http=http, people_count=None) as client:
         state = client.get_state()
         assert state.page_kind == "top"
@@ -155,7 +155,7 @@ def test_client_can_pause_at_top_without_people_count() -> None:
 
 def test_lookup_validates_code() -> None:
     transport, _ = make_handler()
-    http = httpx.Client(transport=transport, follow_redirects=True)
+    http = httpx2.Client(transport=transport, follow_redirects=True)
     with (
         SaizeriyaClient(qr_url_source=QR_URL, people_count=2, http=http) as client,
         pytest.raises(ValueError, match="4 digits"),
@@ -165,7 +165,7 @@ def test_lookup_validates_code() -> None:
 
 def test_add_item_appends_to_cart_and_remove_works() -> None:
     transport, _ = make_handler()
-    http = httpx.Client(transport=transport, follow_redirects=True)
+    http = httpx2.Client(transport=transport, follow_redirects=True)
     with SaizeriyaClient(qr_url_source=QR_URL, people_count=2, http=http) as client:
         client.add_item("1202", count=2)
         client.add_item("3201")
@@ -180,7 +180,7 @@ def test_add_item_appends_to_cart_and_remove_works() -> None:
 
 def test_submit_order_requires_non_empty_cart() -> None:
     transport, _ = make_handler()
-    http = httpx.Client(transport=transport, follow_redirects=True)
+    http = httpx2.Client(transport=transport, follow_redirects=True)
     with (
         SaizeriyaClient(qr_url_source=QR_URL, people_count=2, http=http) as client,
         pytest.raises(ValueError, match="empty cart"),

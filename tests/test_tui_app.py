@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import httpx
+import httpx2
 import pytest
 from textual.widgets import DataTable, Input, TabbedContent
 
@@ -30,9 +30,9 @@ def mock_http(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     monkeypatch.setenv("SAIZERIYA_CLI_HOME", str(tmp_path))
     transport, _ = make_transport()
 
-    def fake_make_http(cookies: list | None = None) -> httpx.Client:
+    def fake_make_http(cookies: list | None = None) -> httpx2.Client:
         del cookies
-        return httpx.Client(transport=transport, follow_redirects=True)
+        return httpx2.Client(transport=transport, follow_redirects=True)
 
     monkeypatch.setattr(session_module, "make_http", fake_make_http)
 

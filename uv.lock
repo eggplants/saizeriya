@@ -236,9 +236,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/37/e7/7069b3d6c018917f49ba2e1c5fb910e498c7fefa3a1b78cb1b79e61ff45d/coverage-7.15.3-py3-none-any.whl", hash = "sha256:da78fa6fc7dafe4212839173133ee85afcf42c5cd5f3e47fa7c1c210453b445e", size = 214297, upload-time = "2026-08-02T18:50:14.709Z" },
 ]
 
-[package.optional-dependencies]
-toml = []
-
 [[package]]
 name = "frozenlist"
 version = "1.8.0"
@@ -741,7 +738,7 @@ wheels = [
 
 [[package]]
 name = "pymarkdownlnt"
-version = "0.9.39"
+version = "0.9.40"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "application-file-scanner" },
@@ -750,9 +747,9 @@ dependencies = [
     { name = "py-walk" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d4/aa/9f6ac3a91b5c02cedb5ada2ae12fddf4954fe3faab176941a68510e9830e/pymarkdownlnt-0.9.39.tar.gz", hash = "sha256:5f422d593244942e4b545b54b512f6b7e509f907752d707695c051bfe8584948", size = 454763, upload-time = "2026-07-12T01:14:22.332Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/60/ea/a784da505745c5eb19b7b6be62a0cee4c25c42ba72e010413a7ebaa40ca7/pymarkdownlnt-0.9.40.tar.gz", hash = "sha256:9e6b1137b9f4b496da10f838bc30f66e4c182a0bf53d93d3afce65a541ded091", size = 467022, upload-time = "2026-09-13T20:29:33.319Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/68/4f/9e129701e6799733fd541d0e4bc624695e70259b4c279dd43fb124e4ff63/pymarkdownlnt-0.9.39-py3-none-any.whl", hash = "sha256:3e6f32517c7cc088dc466830b43ca7a04326bd4fc62d7f5379925ae7ee2f5ad9", size = 532072, upload-time = "2026-07-12T01:14:20.995Z" },
+    { url = "https://files.pythonhosted.org/packages/4e/1e/e2d60317291cedff329cfe08dff7d5a2aefe51ef5f336997e1f2e8a08a94/pymarkdownlnt-0.9.40-py3-none-any.whl", hash = "sha256:de92072911fcb1e5476a7d453078d51457329f5e5cfd78c37d29efc363500262", size = 549389, upload-time = "2026-09-13T20:29:31.653Z" },
 ]
 
 [[package]]
@@ -802,7 +799,7 @@ name = "pytest-cov"
 version = "7.1.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "coverage", extra = ["toml"] },
+    { name = "coverage" },
     { name = "pluggy" },
     { name = "pytest" },
 ]
@@ -925,26 +922,26 @@ wheels = [
 
 [[package]]
 name = "starlette"
-version = "1.4.0"
+version = "1.6.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyio" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ac/16/dc49e4b9d348b0f0567a67613a946f4e26b3299408ccf78df318c51a2aec/starlette-1.4.0.tar.gz", hash = "sha256:ecf3a067176d63c6412f98c660dab3355b525584d3725c0c40a4519d33ec2130", size = 2708995, upload-time = "2026-08-05T09:36:43.693Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b5/b4/205b0d5241d934e8add0c38aa924c4f9fb7330834ff11e5444db964ec3f9/starlette-1.6.0.tar.gz", hash = "sha256:d4e3ac5e546444960c710297a3c9fc3f7ebae1b7e963f3d36173b49da535be9b", size = 2716969, upload-time = "2026-08-08T18:27:57.512Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/be/f6/7916cd7717e196bba370c0f17abb30466014ce29094665c3581e51a8c24b/starlette-1.4.0-py3-none-any.whl", hash = "sha256:cacd43738e07b834844e2c8e97b898b40089d74f2678234b0a3e93cd3d515813", size = 74021, upload-time = "2026-08-05T09:36:41.944Z" },
+    { url = "https://files.pythonhosted.org/packages/c8/cb/6a6a47d5b464bd08695d254f3da6e7986cc70c9fa5d778eda57538edfe56/starlette-1.6.0-py3-none-any.whl", hash = "sha256:a86dd39d14bb45f85a3d18525215a9ef0cfd1f192ac793220e72598c90335f0c", size = 75969, upload-time = "2026-08-08T18:27:56.196Z" },
 ]
 
 [[package]]
 name = "tdom"
-version = "0.1.18"
+version = "0.1.20"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "markupsafe" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/2f/8c/40b6c564c61b0ef8bf5be98b2d2d90b241079a7915c1656a6772c979e2bf/tdom-0.1.18.tar.gz", hash = "sha256:fe1e028e4e33d8c6120dd468cbfe95416847cb5a629ed8c12789929b1cb75c98", size = 29026, upload-time = "2026-07-10T00:18:43.786Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/6b/99/608d12444c53b264dc8e465f899eec68a919577a24ccd14ae21aa0c1efc0/tdom-0.1.20.tar.gz", hash = "sha256:23eceb3def3e25081207406265f61c1485bb39e7ccf1e41d3a0fff182e960ddd", size = 61988, upload-time = "2026-09-06T21:54:12.16Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/df/71/35da72c6db6c657656f0261711e74d453fa77a625046745c393656334e99/tdom-0.1.18-py3-none-any.whl", hash = "sha256:0dc7850436736feb9d2fa524a45d1a5b8cf9d87a364ddaefe7241e7ecafd0dd1", size = 32826, upload-time = "2026-07-10T00:18:42.298Z" },
+    { url = "https://files.pythonhosted.org/packages/a7/7c/42000c1b51358170ba299bceab9933f9731ee3e67230f67383bf9da4c672/tdom-0.1.20-py3-none-any.whl", hash = "sha256:ec57e7bafab7aa89af6ed4290a42f2d43dd3dbe2c2d947fa3f50eb1a76d2bb88", size = 37465, upload-time = "2026-09-06T21:54:10.981Z" },
 ]
 
 [[package]]
@@ -1054,15 +1051,15 @@ wheels = [
 
 [[package]]
 name = "uvicorn"
-version = "0.52.1"
+version = "0.53.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
     { name = "h11" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/03/18/ccce41535dee1be77735592bd19965f3972c82e07ee703d324709496b716/uvicorn-0.52.1.tar.gz", hash = "sha256:112ec661814189acbccd3f7b86460147cc065fc92c0821afa78918780e4354dd", size = 100571, upload-time = "2026-08-01T18:19:30.732Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/5d/ad/04bbb797c84fc1f26cb171f7394716f4865ffb8d8c5e1eef42565c2dfa6b/uvicorn-0.53.0.tar.gz", hash = "sha256:a9356f0cb89b3b8621529c5d5eebd69bfe154f4c3f68b4cf2de47e45fa855c2e", size = 110881, upload-time = "2026-09-14T07:44:23.815Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c7/d5/68e6e9bca63c0badf67002890a46d3784c958de45b65e1275ec583ca1f06/uvicorn-0.52.1-py3-none-any.whl", hash = "sha256:e4403f9d93188cf9d1088e9f40e3acd12630e2df8675316704379a7fc20fff6a", size = 79859, upload-time = "2026-08-01T18:19:29.294Z" },
+    { url = "https://files.pythonhosted.org/packages/76/18/0eea75741ee812e9f598b687619ce2454f6c3a1c5cd21ea990ec6bd26f45/uvicorn-0.53.0-py3-none-any.whl", hash = "sha256:e8dca71ec86dce5f04e333f0d56cdedf942446e6643b9cea1af0d6d3a02cb03e", size = 87081, upload-time = "2026-09-14T07:44:22.179Z" },
 ]
 
 [[package]]

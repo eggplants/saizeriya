@@ -45,7 +45,7 @@ jobs:
         run: |
           uv sync --frozen --no-default-groups --extra tui
           uv run --with pyinstaller pyinstaller --clean --noconfirm --distpath dist packaging/saizeriya.spec
-      - uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4.2.0
+      - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
         if: ${{ matrix.termux }}
         with:
           platforms: arm64

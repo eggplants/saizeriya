@@ -35,7 +35,7 @@ jobs:
           - { os: ubuntu-latest, target: android-arm64, termux: true, timeout: 90 }
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         if: ${{ !matrix.termux }}
       - name: Build standalone binary
         if: ${{ !matrix.termux }}
@@ -45,7 +45,7 @@ jobs:
         run: |
           uv sync --frozen --no-default-groups --extra tui
           uv run --with pyinstaller pyinstaller --clean --noconfirm --distpath dist packaging/saizeriya.spec
-      - uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4.2.0
+      - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
         if: ${{ matrix.termux }}
         with:
           platforms: arm64
@@ -112,7 +112,7 @@ jobs:
             fi
           done
           ls -l release
-      - uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
+      - uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
           files: release/*
           fail_on_unmatched_files: true

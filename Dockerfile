@@ -1,4 +1,4 @@
-FROM debian:13-slim@sha256:3a39a0592364683e6bab97937b72cad5a8fa6dcbbee90edb3bb48c7f8e94f258 AS builder
+FROM debian:13-slim@sha256:a99cfc517144bc59b1978475ec53b46ecabec7e43635402ee5b77cc54cd1b20a AS builder
 
 RUN --mount=type=bind,source=.,target=/app \
     --mount=from=ghcr.io/astral-sh/uv,source=/uv,target=/usr/bin/uv \
@@ -17,7 +17,7 @@ RUN --mount=type=bind,source=.,target=/app \
     uv sync --project=/app --frozen --compile-bytecode --link-mode=copy --no-dev --no-editable --no-managed-python
 EOF
 
-FROM gcr.io/distroless/cc-debian12:nonroot@sha256:e2d29aec8061843706b7e484c444f78fafb05bfe47745505252b1769a05d14f1
+FROM gcr.io/distroless/cc-debian12:nonroot@sha256:9dac0a79194e45a7da0158a9c6da57b217585af0786db3845d1f0ec1a0dd182f
 
 COPY --from=builder /usr/local /usr/local
 

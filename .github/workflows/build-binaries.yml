@@ -59,6 +59,7 @@ jobs:
             --security-opt seccomp=unconfined \
             -v "${PWD}:/repo:ro" -v "${PWD}/dist:/out" -w /repo \
             -e PYINSTALLER_COMPILE_BOOTLOADER=1 \
+            -e CFLAGS=-Wno-error=deprecated-declarations \
             -e PYTHONDONTWRITEBYTECODE=1 \
             -e AIOHTTP_NO_EXTENSIONS=1 \
             -e FROZENLIST_NO_EXTENSIONS=1 \

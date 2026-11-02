@@ -13,13 +13,16 @@ from .screens.start import StartScreen
 if TYPE_CHECKING:
     from .session import OrderSession
 
+_TITLE = "サイゼリヤ"
+_SUB_TITLE = "非公式モバイルオーダー"
+
 
 class SaizeriyaApp(App[None]):
     """Order at Saizeriya from the terminal."""
 
     CSS_PATH = "saizeriya.tcss"
-    TITLE = "サイゼリヤ"
-    SUB_TITLE = "非公式モバイルオーダー"
+    TITLE = _TITLE
+    SUB_TITLE = _SUB_TITLE
     BINDINGS: ClassVar = [("ctrl+q", "quit", "終了")]
 
     def __init__(self, session_name: str | None = None) -> None:
@@ -43,8 +46,8 @@ class SaizeriyaApp(App[None]):
         self._close_session()
         if isinstance(self.screen, OrderScreen):
             self.pop_screen()
-        self.title = self.TITLE
-        self.sub_title = self.SUB_TITLE
+        self.title = _TITLE
+        self.sub_title = _SUB_TITLE
 
     def _close_session(self) -> None:
         if self.session is not None:
